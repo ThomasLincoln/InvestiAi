@@ -1,45 +1,103 @@
-import { useState, useEffect, use } from 'react'
-import { useSearchParams } from "react-router";
-import { createClient } from '@supabase/supabase-js'
+import { useEffect, useState } from 'react';
+import { useLoaderData, useNavigate } from "react-router";
+import { createBrowserClient } from '@supabase/ssr';
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-)
+declare global {
+  interface Window {
+    handleSignInWithGoogle?: (response: any) => void;
+    google?: {
+      accounts?: {
+        id?: {
+          initialize: (params: any) => void;
+          renderButton: (element: HTMLElement, params: any) => void;
+        };
+      };
+    };
+  }
+}
 
-export function Login() {
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [claims, setClaims] = useState(null);
+const GOOGLE_CLIENT_ID = "311352397706-g2nd9g1kio7sg94jqrd0b60o3cfug0hk.apps.googleusercontent.com";
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const hasTokenHash = searchParams.get('token_hash')
-  const type = searchParams.get('type');
+export default function Login() {
+  const [isClient, setIsClient] = useState(false);
+  const data = useLoaderData();
+  const navigate = useNavigate();
+  if (!data) {
+    return <h1>Erro: O loader não retornou dados.</h1>;
+  }
 
-  const [verifying, setVerifying] = useState(!!hasTokenHash)
-  const [authError, setAuthError] = useState(null)
-  const [authSuccess, setAuthSuccess] = useState(false)
+  const { env } = data as {
+    env: { VITE_SUPABASE_URL: string; VITE_SUPABASE_PUBLISHABLE_KEY: string };
+  };
 
   useEffect(() => {
-    const token_hash = searchParams.get('token_hash');
-    const type = searchParams.get('type');
+    setIsClient(true);
+    const supabase = createBrowserClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY);
 
-    if(token_hash){
-      supabase.auth
-        .verifyOtp({
-          token_hash,
-          type: type || 'email',
-        })
-        .then(({error}) => {
-          if (error) {
-            setAuthSuccess(true)
-            
-          }
-        })
+    window.handleSignInWithGoogle = async (response) => {
+      console.log("Função de callback chamada!");
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: response.credential,
+      });
+
+      if (error) {
+        console.error("Erro no login:", error.message);
+      } else {
+        console.log("Login realizado com sucesso!", data);
+        navigate('/dashboard');
+      }
+    };
+
+    const renderGoogleButton = () => {
+      const google = window.google?.accounts?.id;
+      const target = document.getElementById('google-signin-button');
+
+      if (!google || !target) return false;
+
+      google.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: window.handleSignInWithGoogle,
+        ux_mode: 'popup',
+        auto_select: false,
+        cancel_on_tap_outside: false,
+      });
+
+      google.renderButton(target, {
+        type: 'standard',
+        shape: 'pill',
+        theme: 'filled_blue',
+        text: 'continue_with',
+        size: 'large',
+        logo_alignment: 'left',
+      });
+
+      return true;
+    };
+
+    if (!renderGoogleButton()) {
+      const interval = window.setInterval(() => {
+        if (renderGoogleButton()) {
+          window.clearInterval(interval);
+        }
+      }, 100);
+
+      return () => {
+        window.clearInterval(interval);
+        delete window.handleSignInWithGoogle;
+      };
     }
-  })
-  
+
+    return () => {
+      delete window.handleSignInWithGoogle;
+    };
+  }, [env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, navigate]);
+
   return (
-    <h1>teste</h1>
-  )
+    <div>
+      <h1>Login</h1>
+      {isClient && <div id="google-signin-button" />}
+    </div>
+  );
 }
