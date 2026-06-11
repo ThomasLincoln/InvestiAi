@@ -32,6 +32,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
         <script src="https://accounts.google.com/gsi/client" async></script>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></link>
       </head>
       <body>
         {children}

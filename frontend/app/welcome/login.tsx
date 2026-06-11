@@ -46,6 +46,7 @@ export default function Login() {
         console.error("Erro no login:", error.message);
       } else {
         console.log("Login realizado com sucesso!", data);
+        // console.log(data);
         navigate('/dashboard');
       }
     };
@@ -95,9 +96,19 @@ export default function Login() {
   }, [env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, navigate]);
 
   return (
-    <div>
-      <h1>Login</h1>
-      {isClient && <div id="google-signin-button" />}
+    <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f3f4f6' }}>
+      <div style={{ backgroundColor: 'white', padding: '3rem', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+
+        <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#111827' }}>
+          Acesse o InvestAi
+        </h1>
+        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
+          Faça login de forma rápida e segura
+        </p>
+
+        <div id="google-signin-button" style={{ display: 'flex', justifyContent: 'center' }}></div>
+
+      </div>
     </div>
   );
 }

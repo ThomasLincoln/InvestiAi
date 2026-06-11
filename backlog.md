@@ -16,9 +16,9 @@ Este documento contém o plano de execução para a plataforma. Sinta-se à vont
 
 ## 1.1 Autenticação e Segurança
 
-- [ ] Configurar Supabase Auth/JWT.
+- [x] Configurar Supabase Auth/JWT.
 - [ ] Implementar login por E-mail/Senha.
-- [ ] Implementar Social Login (Google).
+- [x] Implementar Social Login (Google).
 - [ ] Criar validação de força de password.
 
 ## 1.2 Perfil e Configuração
