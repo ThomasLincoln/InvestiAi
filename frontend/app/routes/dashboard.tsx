@@ -3,31 +3,42 @@ import { Link, Outlet, useLoaderData } from "react-router";
 import { createBrowserClient } from "@supabase/ssr";
 import { useState } from "react";
 import PatrimonioTotal from "~/components/PatrimonioTotal";
-import SideBar from "~/components/sideBar";
+import SideBarComponent from "~/components/SideBarComponent";
 import type { User } from "~/types";
 
 
-export async function loader() {
-  const supabase = createBrowserClient(process.env.VITE_SUPABASE_URL || " ", process.env.VITE_SUPABASE_PUBLISHABLE_KEY || " ");
+export async function clientLoader() {
+  const supabase = createBrowserClient(import.meta.env.VITE_SUPABASE_URL || " ", import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || " ");
 
   const { data: { session } } = await supabase.auth.getSession();
 
   let profile = null;
   if (session) {
     const { data } = await supabase
-      .from('profiles')
-      .select('fullname, email, picture')
+      .from('perfil_pessoal')
+      .select('fullname, email, picture, saldo')
       .eq('id', session.user.id)
       .single()
     profile = data;
   }
+
   return {
     user: profile,
     env: {
-      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || "",
-      VITE_SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "",
+      VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || "",
+      VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "",
     }
   }
+}
+
+export function HydrateFallback() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f3f4f6' }}>
+      <p style={{ fontSize: '1.2rem', color: '#4b5563', fontWeight: 'bold' }}>
+        Carregando painel...
+      </p>
+    </div>
+  );
 }
 
 export default function Dashboard() {
@@ -45,16 +56,16 @@ export default function Dashboard() {
     crescimento: true,
     porcentagem: 3.4,
   }
-  
+
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f3f4f6', margin: 0 }}>
-      <SideBar
+      <SideBarComponent
         isOpen={isSidebarOpen}
         toggle={() => setIsSidebarOpen(!isSidebarOpen)}
         supabase={supabase}
-      ></SideBar>
+      />
       <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-        <Outlet context={{ user }}/>
+        <Outlet context={{ user }} />
       </main>
     </div>
   );

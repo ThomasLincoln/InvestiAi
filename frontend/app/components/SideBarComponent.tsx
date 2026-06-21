@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import ButtonLogOut from "./ButtonLogOut";
 import type { User } from "~/types";
 
-export default function SideBar({ isOpen, toggle, supabase }: { isOpen: boolean; toggle: () => void; supabase: any }) {
+export default function SideBarComponent({ isOpen, toggle, supabase }: { isOpen: boolean; toggle: () => void; supabase: any }) {
     const navItems = [
         { name: 'Início', path: '/dashboard', icon: 'home' },
         { name: 'Meus Ativos', path: '/dashboard/wallet', icon: 'trending_up' },
@@ -10,7 +10,7 @@ export default function SideBar({ isOpen, toggle, supabase }: { isOpen: boolean;
     ];
 
     return (
-        <aside style={{ width: isOpen ? '13pc' : '4pc', backgroundColor: '#1f2937', color: 'white', transition: 'width 0.3s ease', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <aside className="bg-violet-950" style={{ width: isOpen ? '13pc' : '4pc', color: 'white', transition: 'width 0.3s ease', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', padding: '1.5rem 1.5rem' }}>
                 {isOpen && <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>InvestAi</span>}
                 <button onClick={toggle} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', paddingRight: '0.5pc' }} className="material-icons">

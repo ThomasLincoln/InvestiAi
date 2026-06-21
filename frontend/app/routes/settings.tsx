@@ -1,4 +1,4 @@
-import SideBar from "~/components/sideBar";
+import SideBar from "~/components/SideBarComponent";
 import { useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useLoaderData, useOutletContext } from "react-router";
@@ -23,19 +23,12 @@ export default function Settings() {
   };
   const supabase = createBrowserClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { user } = useOutletContext<{ user: User | null }>();
   const [profile, setProfile] = useState({
-    name: '',
-    email: ''
+    name: user?.fullname,
+    email: user?.email
   })
 
-  const { user } = useOutletContext<{ user: User | null }>();
-  if (user?.fullname) {
-    setProfile({ ...profile, name: user.fullname })
-  }
-  if (user?.email) {
-    setProfile({ ...profile, email: user.email })
-  }
-  console.log(user)
   return (
     <div style={{
       display: 'flex',
@@ -73,7 +66,7 @@ export default function Settings() {
                 name="username"
                 type="text"
                 value={profile.name}
-                onChange={e => setProfile({ ...profile, name: e.target.value })}
+                // onChange={e => setProfile({ ...profile, name: e.target.value })}
                 style={{
                   padding: '0.8rem',
                   borderRadius: '6px',

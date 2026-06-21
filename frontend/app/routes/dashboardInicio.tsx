@@ -1,6 +1,6 @@
 import PatrimonioTotal from "~/components/PatrimonioTotal";
 import { useOutletContext } from "react-router";
-import SideBar from "~/components/sideBar";
+import SideBar from "~/components/SideBarComponent";
 import { useState } from "react";
 
 export default function DashboardInicio() {
@@ -19,7 +19,7 @@ export default function DashboardInicio() {
                 Bem-vindo! Aqui está o resumo dos seus investimentos.
             </p>
 
-            <PatrimonioTotal valorTotal={18256.86} mudanca={mudanca} />
+            <PatrimonioTotal valorTotal={user.saldo} mudanca={mudanca} />
         </div>
     );
 }
