@@ -63,8 +63,8 @@ export default function Settings() {
   return (
     <>
       <div className="flex">
-        <SearchComponent items={ativos} />
-        <AddInvestimento />
+        {/* <SearchComponent items={ativos} /> */}
+        <AddInvestimento items={ativos}/>
       </div>
       <Ativos items={carteira} />
     </>

@@ -28,7 +28,7 @@ export default function SideBarComponent({ isOpen, toggle, supabase }: { isOpen:
             </nav>
 
             <div style={{ padding: '1rem', borderTop: '1px solid #374151', cursor: 'pointer' }}>
-                <div style={{ display: 'flex', alignItems: 'center', color: '#ef4444', cursor: 'pointer' }}>
+                <div className="text-red-600 bg-red-300 rounded-2xl border-2 p-2" style={{ display: 'flex', alignItems: 'center',  cursor: 'pointer' }}>
                     <span className="material-icons" style={{ marginRight: isOpen ? '10px' : '0', cursor: 'pointer' }}>logout</span>
                     {isOpen && <ButtonLogOut supabase={supabase} />}
                 </div>
