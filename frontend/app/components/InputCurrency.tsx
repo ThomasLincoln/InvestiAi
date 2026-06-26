@@ -1,54 +1,126 @@
-import { useState } from "react";
-import { BR } from 'country-flag-icons/react/3x2'
+import { useState, useRef, useEffect } from "react";
+import { BR, US } from 'country-flag-icons/react/3x2'
+import { ChevronDown } from "lucide-react";
 
-export default function InputCurrency() {
+export const moedas = [
+    { codigo: 'BRL', nome: 'Real', simbolo: 'R$', Bandeira: BR },
+    { codigo: 'USD', nome: 'Dólar', simbolo: '$', Bandeira: US },
+] as const;
+
+export type Moeda = typeof moedas[number];
+
+export function formatarMoeda(valor: number): string {
+    return valor.toFixed(2).replace('.', ',');
+}
+
+export function parsearValor(texto: string): number {
+    const soNumeros = texto.replace(/[^\d]/g, '');
+    return Number(soNumeros) / 100;
+}
+
+interface InputCurrencyProps {
+    valor: number;
+    moeda: Moeda;
+    onValorChange: (valor: number) => void;
+    onMoedaChange: (moeda: Moeda) => void;
+}
+
+export default function InputCurrency({ valor, moeda, onValorChange, onMoedaChange }: InputCurrencyProps) {
     const [menuAberto, setMenuAberto] = useState(false);
-    const [moedaSelecionada, setMoedaSelecionada] = useState('BRL');
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    // 2. Função para atualizar a moeda e fechar o menu logo em seguida
-    const selecionarMoeda = (novaMoeda: string) => {
-        setMoedaSelecionada(novaMoeda);
+    useEffect(() => {
+        function handleClickFora(e: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setMenuAberto(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickFora);
+        return () => document.removeEventListener("mousedown", handleClickFora);
+    }, []);
+
+    const selecionarMoeda = (m: Moeda) => {
+        onMoedaChange(m);
         setMenuAberto(false);
     };
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onValorChange(parsearValor(e.target.value));
+    };
+
+    const { Bandeira } = moeda;
+
     return (
-        <>
-            <div className="relative w-full">
-                <div className="absolute inset-y-0 inset-s-0 top-0 flex items-center ps-3.5 pointer-events-none">
-                    <svg className="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M8 7V6a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1M3 18v-7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Zm8-3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
+        <div ref={containerRef} className="relative">
+            <div className="flex items-stretch h-10.5 rounded-xl overflow-hidden
+                bg-gray-800/60 border border-gray-700/50
+                focus-within:ring-2 focus-within:ring-violet-500/40
+                focus-within:border-violet-500/50 transition-all">
+                <div className="flex items-center pl-3 pointer-events-none shrink-0">
+                    <span className="text-sm font-semibold text-violet-400">
+                        {moeda.simbolo}
+                    </span>
                 </div>
-                <input type="number" id="currency-input" className="block w-full ps-9 pe-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-s-base focus:ring-brand focus:border-brand placeholder:text-body" placeholder="Enter amount" required />
+                <input
+                    type="text"
+                    inputMode="numeric"
+                    className="flex-1 bg-transparent pl-2 pr-1
+                        text-white text-sm font-medium
+                        outline-none border-none
+                        placeholder:text-gray-600"
+                    placeholder="0,00"
+                    value={formatarMoeda(valor)}
+                    onChange={handleChange}
+                    required
+                />
+                <button
+                    type="button"
+                    className="flex items-center gap-1.5 px-2.5 shrink-0
+                        text-gray-400 hover:text-white
+                        border-l border-gray-700/50
+                        hover:bg-gray-700/40 transition-colors cursor-pointer"
+                    onClick={() => setMenuAberto(!menuAberto)}
+                >
+                    <Bandeira
+                        title={moeda.nome}
+                        className="h-3.5 w-5 rounded-sm object-cover"
+                    />
+                    <span className="text-xs font-medium">{moeda.codigo}</span>
+                    <ChevronDown
+                        size={12}
+                        className={`transition-transform ${menuAberto ? 'rotate-180' : ''}`}
+                    />
+                </button>
             </div>
-            <button id="dropdown-currency-button"
-                data-dropdown-toggle="dropdown-currency"
-                type="button"
-                className="inline-flex items-center shrink-0 z-10 
-                    text-body bg-neutral-secondary-medium box-border border 
-                    border-default-medium hover:bg-neutral-tertiary-medium 
-                    hover:text-fg-brand focus:ring-4 focus:ring-neutral-tertiary 
-                    font-medium leading-5 rounded-e-base text-sm px-4 py-2.5 
-                    focus:outline-none"
-                onClick={() => setMenuAberto(!menuAberto)}
-            >
-                <BR title="Brasil" className="h-6 w-6 rounded-full object-cover mr-2" />
-                {moedaSelecionada}
-            </button>
-            <div className={`z-10 absolute mt-2 bg-neutral-primary-medium border 
-                border-default-medium rounded-base shadow-lg w-32 overflow-y-auto max-h-20
-                ${menuAberto ? 'block' : 'hidden'}`}>
-                <ul className="p-2 text-sm text-body font-medium bg-gray-900" aria-labelledby="dropdown-currency-button">
-                    <li>
-                        <button
-                            type="button"
-                            onClick={() => selecionarMoeda('BRL')}
-                            className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium rounded-md"
-                        >
-                            <BR title="Brasil" className="h-6 w-6 rounded-full object-cover mr-2" />
-                            BRL
-                        </button>
-                    </li>
+
+            {menuAberto && (
+                <ul className="absolute right-0 z-20 mt-1.5 w-40
+                    bg-gray-800 border border-gray-700/50
+                    rounded-xl shadow-xl shadow-black/40
+                    overflow-hidden py-1"
+                >
+                    {moedas.map((m) => (
+                        <li key={m.codigo}>
+                            <button
+                                type="button"
+                                onClick={() => selecionarMoeda(m)}
+                                className={`flex items-center gap-2 w-full px-3 py-2
+                                    text-sm transition-colors cursor-pointer
+                                    ${m.codigo === moeda.codigo
+                                        ? 'text-white bg-violet-600/15'
+                                        : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
+                            >
+                                <m.Bandeira
+                                    title={m.nome}
+                                    className="h-3.5 w-5 rounded-sm object-cover"
+                                />
+                                <span className="font-medium">{m.codigo}</span>
+                                <span className="text-gray-500 text-xs">{m.nome}</span>
+                            </button>
+                        </li>
+                    ))}
                 </ul>
-            </div>
-        </>
-    )
+            )}
+        </div>
+    );
 }

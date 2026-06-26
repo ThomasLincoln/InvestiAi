@@ -1,106 +1,148 @@
-import { ChevronsUpDown, Search } from "lucide-react";
+import { ChevronsUpDown, Search, Check } from "lucide-react";
 import { useMemo, useRef, useState, useEffect } from "react";
 import type { Ativo } from "~/types";
 
-export function ComboboxAtivo({ items, placeholder, onChange }:
-    { items: Ativo[], placeholder: string, onChange?: (option: Ativo) => void }) {
+export function ComboboxAtivo({ items, placeholder, value = null, onChange }:
+    { items: Ativo[], placeholder: string, value?: Ativo | null, onChange?: (option: Ativo) => void }) {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState("");
-    const [ativoSelecionado, setAtivoSelecionado] = useState<Ativo | null>(null);
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const [selected, setSelected] = useState<Ativo | null>(null);
 
-    const containerRef = useRef(null);
-    console.log(items)
+    const selected = value;
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const ativosFiltrados = useMemo(() => {
         if (!query) return items;
         return items.filter((item) =>
-            item.ticker.toLowerCase().includes(query.toLowerCase())
-        )
-    }, [items, query])
+            item.ticker.toLowerCase().includes(query.toLowerCase()) ||
+            item.nome?.toLowerCase().includes(query.toLowerCase())
+        );
+    }, [items, query]);
 
     const selectedOption = (option: Ativo) => {
-        setSelected(option);
-        // setQuery(option.ticker);
+        setQuery("");
         setIsOpen(false);
         onChange?.(option);
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (!isOpen) return;
         switch (e.key) {
             case "ArrowDown":
+                e.preventDefault();
                 setSelectedIndex(i => Math.min(i + 1, ativosFiltrados.length - 1));
                 break;
             case "ArrowUp":
-                setSelectedIndex(i => Math.max(i - 1, ativosFiltrados.length - 1));
+                e.preventDefault();
+                setSelectedIndex(i => Math.max(i - 1, 0));
                 break;
             case "Enter":
-                setAtivoSelecionado(ativosFiltrados[selectedIndex]);
+                e.preventDefault();
+                if (ativosFiltrados[selectedIndex]) {
+                    selectedOption(ativosFiltrados[selectedIndex]);
+                }
                 break;
             case "Escape":
                 setIsOpen(false);
-                break;
-            default:
                 break;
         }
     };
 
     useEffect(() => {
         if (!isOpen) return;
-        if (selected) {
-            const index = ativosFiltrados.findIndex((opt) => opt.id === selected.id);
-            setSelectedIndex(index >= 0 ? index : 0);
-        } else {
-            setSelectedIndex(0);
-        }
+        const index = selected
+            ? ativosFiltrados.findIndex((opt) => opt.id === selected.id)
+            : 0;
+        setSelectedIndex(index >= 0 ? index : 0);
     }, [isOpen, selected, ativosFiltrados]);
+
+    useEffect(() => {
+        function handleClickFora(e: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickFora);
+        return () => document.removeEventListener("mousedown", handleClickFora);
+    }, []);
+
     return (
-        <div ref={containerRef} className="relative w-full h-auto">
-            <div className="flex items-center gap-2 flex-1 border p-2 border-gray-200
-            rounded-md cursor-pointer" onClick={() => setIsOpen((prev) => !prev)}>
-                <label className="text-base text-neutral-100 cursor-pointer select-none">
-                    {selected?.ticker ? selected.ticker : placeholder}</label>
-                <ChevronsUpDown size={16} className="text-neutral-400 ml-auto" />
-            </div>
+        <div ref={containerRef} className="relative w-full">
+            <button
+                type="button"
+                onClick={() => setIsOpen((prev) => !prev)}
+                className={`flex items-center w-full h-10.5 px-3 gap-2
+                    bg-gray-800/60 border rounded-xl
+                    cursor-pointer transition-all text-sm
+                    ${isOpen
+                        ? 'border-violet-500/50 ring-2 ring-violet-500/40'
+                        : 'border-gray-700/50 hover:border-gray-600'}`}
+            >
+                <span className={selected ? 'text-white font-medium' : 'text-gray-500'}>
+                    {selected?.ticker ?? placeholder}
+                </span>
+                {selected?.nome && (
+                    <span className="text-gray-500 text-xs truncate">
+                        {selected.nome}
+                    </span>
+                )}
+                <ChevronsUpDown size={14} className="text-gray-500 ml-auto shrink-0" />
+            </button>
+
             {isOpen && (
-                <div className="absolute inset-x-0 z-50 border border-gray-200 
-            p-2 rounded-md flex flex-col items-start justify-start gap-4 mt-2
-             shadow-sm max-h-64 bg-gray-900">
-                    <div className="flex-1 w-full flex items-center gap-2 bg-neutral-100
-                rounded-md p-2.5">
-                        <Search size={16} className="text-neutral-600" />
-                        <input type="text" placeholder="Search"
-                            className="text-neutral-600 outline-none border-none"
+                <div className="absolute inset-x-0 z-50 mt-2
+                    bg-gray-800 border border-gray-700/50
+                    rounded-xl shadow-xl shadow-black/40
+                    overflow-hidden">
+                    <div className="flex items-center gap-2 px-3 py-2.5
+                        border-b border-gray-700/50">
+                        <Search size={14} className="text-gray-500 shrink-0" />
+                        <input
+                            type="text"
+                            placeholder="Buscar ticker ou nome..."
+                            className="flex-1 bg-transparent text-sm text-white
+                                placeholder:text-gray-500 outline-none border-none"
+                            value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            onKeyDown={handleKeyDown} />
+                            onKeyDown={handleKeyDown}
+                            autoFocus
+                        />
                     </div>
 
-                    <div className="flex-1 flex flex-col items-start justify-start
-                    gap-2 w-full overflow-y-auto">
-                        {
-
-                            ativosFiltrados.length > 0 ?
-                                <>{ativosFiltrados.map((item, index) => (
-                                    <div className={`text-neutral-200 p-1.5 cursor-pointer text-sm
-                                rounded-md w-full hover:bg-neutral-500 select-none
-                                ${selectedIndex === index ? "bg-gray-600" : "bg-transparent"}`}
-                                        key={`${index}-${item.id}`}
-                                        onClick={() => selectedOption(ativosFiltrados[index])}
-                                    >
+                    <div className="max-h-48 overflow-y-auto py-1">
+                        {ativosFiltrados.length > 0 ? (
+                            ativosFiltrados.map((item, index) => (
+                                <button
+                                    type="button"
+                                    key={item.id}
+                                    onClick={() => selectedOption(item)}
+                                    className={`flex items-center gap-2 w-full px-3 py-2
+                                        text-sm transition-colors cursor-pointer
+                                        ${selectedIndex === index
+                                            ? 'bg-violet-600/15 text-white'
+                                            : 'text-gray-300 hover:bg-gray-700/50'}`}
+                                >
+                                    <span className="font-medium min-w-15 text-left">
                                         {item.ticker}
-                                    </div>
-                                ))}</> :
-                                <>
-                                    <div className="w-full flex items-center justify-center">
-                                        <p>Não encontrado</p>
-                                    </div>
-                                </>
-                        }
+                                    </span>
+                                    {item.nome && (
+                                        <span className="text-gray-500 text-xs truncate">
+                                            {item.nome}
+                                        </span>
+                                    )}
+                                    {selected?.id === item.id && (
+                                        <Check size={14} className="text-violet-400 ml-auto shrink-0" />
+                                    )}
+                                </button>
+                            ))
+                        ) : (
+                            <div className="px-3 py-6 text-center text-sm text-gray-500">
+                                Nenhum ativo encontrado
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
         </div>
-    )
+    );
 }
