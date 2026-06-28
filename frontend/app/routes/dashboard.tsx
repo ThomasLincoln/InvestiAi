@@ -51,20 +51,20 @@ export default function Dashboard() {
     env: { VITE_SUPABASE_URL: string; VITE_SUPABASE_PUBLISHABLE_KEY: string };
   };
   const supabase = createBrowserClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const mudanca = {
     crescimento: true,
     porcentagem: 3.4,
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f3f4f6', margin: 0 }}>
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-950 p-4 gap-4 transition-colors">
       <SideBarComponent
         isOpen={isSidebarOpen}
         toggle={() => setIsSidebarOpen(!isSidebarOpen)}
         supabase={supabase}
       />
-      <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
+      <main className="flex-1 overflow-y-auto rounded-2xl bg-white dark:bg-gray-900 shadow-sm dark:shadow-gray-950/50 p-8 transition-colors">
         <Outlet context={{ user }} />
       </main>
     </div>

@@ -109,7 +109,7 @@ export function ComboboxAtivo({ items, placeholder, value = null, onChange }:
                         />
                     </div>
 
-                    <div className="max-h-48 overflow-y-auto py-1">
+                    <div className="max-h-48 overflow-y-auto py-1 pl-4">
                         {ativosFiltrados.length > 0 ? (
                             ativosFiltrados.map((item, index) => (
                                 <button

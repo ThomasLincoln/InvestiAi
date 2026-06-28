@@ -17,7 +17,7 @@ export default function ButtonLogOut({supabase} : ButtonLogOutProps) {
     }
   }
   return (
-    <button onClick={signOut}>
+    <button id="logout-btn" onClick={signOut} className='select-none '>
       Sair
     </button>
   );

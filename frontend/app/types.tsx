@@ -10,4 +10,5 @@ export interface Ativo {
     ticker: string;
     nome: string;
     quantidade?: number;
+    preco?: number;
 }

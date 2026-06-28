@@ -3,8 +3,9 @@ import type { Ativo } from "~/types";
 import { ComboboxAtivo } from "./ComboBoxAtivo";
 import InputCurrency, { moedas, type Moeda } from "./InputCurrency";
 import { Plus, X, TrendingUp } from "lucide-react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-export default function AddInvestimento({ items }: { items: Ativo[] }) {
+export default function AddInvestimento({ items, supabase }: { items: Ativo[], supabase: SupabaseClient }) {
     const [isOpen, setIsOpen] = useState(false);
 
     const [ativo, setAtivo] = useState<Ativo | null>(null);
@@ -31,26 +32,46 @@ export default function AddInvestimento({ items }: { items: Ativo[] }) {
         resetForm();
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        console.log(ativo);
+        if (!ativo || !ativo.id) {
+            alert("Por favor, selecione um ativo válido.");
+            return;
+        }
 
-        const dados = {
-            ativo,
-            quantidade,
-            dataAquisicao,
-            precoUnitario,
-            valorTotal,
-            moeda: moeda.codigo,
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            alert("Você precisa estar logado!");
+            return;
+        }
+        const novoAporte = {
+            Usuario: session.user.id,
+            Ativo: parseInt(ativo.id),
+            Quantidade: quantidade,
+            preco_unitario: precoUnitario,
+            data_transacao: dataAquisicao,
+            tipo: 'COMPRA'
         };
+        console.log(novoAporte)
+        const { error } = await supabase
+            .from('transacoes')
+            .insert([novoAporte]);
 
-        console.log("Dados do formulário:", dados);
+        if (error) {
+            console.error("Erro ao salvar:", error);
+            alert("Falha ao registrar aporte.");
+        } else {
+            alert("Aporte registrado com sucesso!");
+            fecharModal();
+        }
         fecharModal();
     };
 
     useEffect(() => {
         setValorTotal(quantidade * precoUnitario);
     }, [quantidade, precoUnitario])
-    
+
     return (
         <div>
             <button

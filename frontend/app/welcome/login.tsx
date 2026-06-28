@@ -96,17 +96,17 @@ export default function Login() {
   }, [env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, navigate]);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f3f4f6' }}>
-      <div style={{ backgroundColor: 'white', padding: '3rem', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+    <div className="flex h-screen justify-center items-center bg-gray-100 dark:bg-gray-950 transition-colors">
+      <div className="bg-white dark:bg-gray-800 p-12 rounded-2xl shadow-lg dark:shadow-gray-950/50 text-center border border-gray-200 dark:border-gray-700">
 
-        <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#111827' }}>
+        <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
           Acesse o InvestAi
         </h1>
-        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
+        <p className="text-gray-500 dark:text-gray-400 mb-8">
           Faça login de forma rápida e segura
         </p>
 
-        <div id="google-signin-button" style={{ display: 'flex', justifyContent: 'center' }}></div>
+        <div id="google-signin-button" className="flex justify-center"></div>
 
       </div>
     </div>

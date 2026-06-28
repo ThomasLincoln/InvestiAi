@@ -1,7 +1,7 @@
 import { useLoaderData } from "react-router";
 import { createBrowserClient } from "@supabase/ssr";
 import { useEffect, useState } from "react";
-import SearchComponent from "~/components/SearchComponent";
+
 import type { Ativo } from "~/types";
 import Ativos from "~/components/Ativos";
 import AddInvestimento from "~/components/AddInvestimentoComponent";
@@ -26,7 +26,7 @@ export default function Settings() {
     env: { VITE_SUPABASE_URL: string; VITE_SUPABASE_PUBLISHABLE_KEY: string };
   };
   const supabase = createBrowserClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   const [ativos, setAtivos] = useState<Ativo[]>([]);
   const [carteira, setCarteira] = useState<Ativo[]>([]);
 
@@ -44,7 +44,7 @@ export default function Settings() {
   async function fetchCarteira() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data } = await supabase.from('ativos_na_carteira').select('id, Quantidade, Ativo (ticker, nome)')
+      const { data } = await supabase.from('transacoes').select('id, Quantidade, Ativo (ticker, nome), preco_unitario')
         .eq('Usuario', user.id);
       const dadosBrutos = data ?? [];
       const dadosTransformados = dadosBrutos.map((item) => {
@@ -52,21 +52,24 @@ export default function Settings() {
           id: item.id,
           ticker: (item.Ativo as any).ticker,
           nome: (item.Ativo as any).nome,
-          quantidade: item.Quantidade
-
+          quantidade: item.Quantidade,
+          preco: item.preco_unitario,
         }
       })
-      console.log(dadosTransformados)
+      console.log("dados transformados: ", dadosTransformados)
       setCarteira(dadosTransformados ?? []);
     }
   }
   return (
-    <>
-      <div className="flex">
-        {/* <SearchComponent items={ativos} /> */}
-        <AddInvestimento items={ativos}/>
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Meus Ativos</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Acompanhe seus investimentos</p>
+        </div>
+        <AddInvestimento items={ativos} supabase={supabase} />
       </div>
       <Ativos items={carteira} />
-    </>
+    </div>
   );
 }

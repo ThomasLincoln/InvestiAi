@@ -1,4 +1,4 @@
-import { Wallet, TrendingUp } from "lucide-react";
+import { Wallet, TrendingUp, TrendingDown } from "lucide-react";
 
 interface Mudanca {
     crescimento?: boolean,
@@ -16,47 +16,31 @@ export default function PatrimonioTotal({ valorTotal, mudanca }: PatrimonioProps
         currency: 'BRL'
     }).format(valorTotal);
 
+    const positivo = mudanca.crescimento !== false;
+
     return (
-        <div style={{
-            backgroundColor: 'white',
-            padding: '1.5rem',
-            borderRadius: '8px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            width: '350px'
-        }}>
-            <div style={{
-                backgroundColor: '#eff6ff', padding: '1rem',
-                borderRadius: '50%', color: '#3b82f6', display: 'flex'
-            }}>
-                <Wallet size={28} />
+        <div className="flex items-center gap-5 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors">
+            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 shrink-0">
+                <Wallet size={22} />
             </div>
-            <div>
-                <p style={{ color: '#6b7280', margin: 0, fontSize: '0.875rem', fontWeight: '500' }}>
+            <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none">
                     Patrimônio Total
                 </p>
-                <h2 style={{ color: '#111827', margin: '0.25rem 0 0 0', fontSize: '1.5rem' }}>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                     {valorFormatado}
                 </h2>
             </div>
-            <div>
-                <div style={{
-                    backgroundColor: '#e2eeff', padding: '0.3rem',
-                    borderRadius: '10%', color: '#24c24c', display: 'flex',
-                }}>
-                    <div>
-                        <TrendingUp size={18} />
-                    </div>
-                    <div style={{
-                        paddingLeft: '0.6rem'
-                    }}>
-                        {mudanca.porcentagem}%
-                    </div>
-                </div>
+            <div className={`
+                flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold
+                ${positivo
+                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                }
+            `}>
+                {positivo ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                {mudanca.porcentagem}%
             </div>
-
         </div>
-    )
+    );
 }
