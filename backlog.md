@@ -1,80 +1,143 @@
-🚀 Backlog: Plataforma de Gestão Financeira Inteligente
+# Backlog: InvestiAi — Plataforma de Gestão Financeira Inteligente
 
-Este documento contém o plano de execução para a plataforma. Sinta-se à vontade para utilizar estas checkboxes para gerir o progresso no GitHub Projects.
+Este documento contém o plano de execução da plataforma. As checkboxes refletem o estado atual de cada item.
 
-🛠️ Stack Tecnológica
+---
 
-- [x] Frontend (Web): React.js + Tailwind CSS
+## Stack Tecnológica
+
+- [x] Frontend (Web): React Router 7 (SSR) + Tailwind CSS 4 + Lucide Icons
+- [x] BD/Auth: Supabase (PostgreSQL + Auth + Row Level Security)
+- [ ] Backend: Python (FastAPI) — pasta criada, ainda sem código
 - [ ] Mobile: React Native (Expo)
-- [ ] Backend: Python (FastAPI)
-- [ ] BD: PostgreSQL (Supabase)
 - [ ] IA: Gemini API (gemini-1.5-flash)
 - [ ] OCR/PDF: LangChain + Google Vision API + PyMuPDF
 - [ ] Scraping: Playwright
 
-# 🏗️ Épico 1: Core & Fundação (Infraestrutura)
+---
 
-## 1.1 Autenticação e Segurança
+## Fase 1 — MVP Web (em andamento)
 
-- [x] Configurar Supabase Auth/JWT.
-- [ ] Implementar login por E-mail/Senha.
-- [x] Implementar Social Login (Google).
-- [ ] Criar validação de força de password.
+### 1.1 Autenticação e Segurança
 
-## 1.2 Perfil e Configuração
+- [x] Configurar Supabase Auth com JWT
+- [x] Implementar Social Login (Google) com ID Token
+- [ ] Implementar login por E-mail/Senha
+- [ ] Criar validação de força de senha
+- [ ] Proteger rotas autenticadas (redirect se não logado)
 
-- [ ] Criar ecrã de setup inicial.
-- [ ] Implementar seleção de moeda (BRL/USD).
-- [ ] Implementar definição de perfil de risco (Conservador/Moderado/Arrojado).
+### 1.2 Layout e Navegação
 
-# 📈 Épico 2: Gestão de Ativos e Carteira
+- [x] Criar layout do dashboard com sidebar responsiva
+- [x] Implementar navegação entre páginas (Início, Carteira, Configurações)
+- [x] Criar componente de logout
+- [x] Implementar destaque de link ativo na sidebar
 
-## 2.1 Cadastro de Ativos Multiclasse
+### 1.3 Dashboard — Início
 
-- [ ] Criar CRUD de ativos (Ações, FIIs, Cripto, Renda Fixa).
-- [ ] Integrar API para procura automática de tickers (Yahoo Finance/Brapi).
-- [ ] Implementar lógica de histórico de compras para Preço Médio.
+- [x] Exibir saudação personalizada com nome do usuário
+- [x] Card de Patrimônio Total com indicador de variação
+- [x] Cards placeholder para "Ativos na Carteira" e "Rentabilidade Mensal"
+- [ ] Preencher cards com dados reais (quantidade de ativos, rentabilidade)
+- [ ] Implementar gráficos de evolução da carteira
 
-## 2.2 Estratégia de Alocação (Porcentagens Alvo)
-- [ ] Desenvolver UI de sliders para alocação alvo (total 100%).
-- [ ] Criar barras de progresso para visualização Meta vs. Atual.
+### 1.4 Carteira (Wallet)
 
-# 🤖 Épico 3: Automação e Inteligência de Investimento
+- [x] Listar ativos do usuário em tabela (ticker, nome, quantidade, preço unitário)
+- [x] Modal de "Novo Lançamento" com busca de ativo, quantidade, data e preço
+- [x] Componente ComboBox para busca de ativos
+- [x] Componente InputCurrency com seleção de moeda (BRL/USD)
+- [x] Estado vazio com ilustração quando não há ativos
+- [ ] Implementar edição e exclusão de transações
+- [ ] Calcular e exibir preço médio real por ativo
+- [ ] Exibir preço atual do ativo (integração com API de cotações)
+- [ ] Calcular e exibir variação (%) e saldo por ativo
+- [ ] Agrupar transações por ativo (consolidar posição)
 
-## 3.1 Sugestão de Aporte "Buy the Gap"
+### 1.5 Configurações
 
-- [ ] Desenvolver algoritmo de reequilíbrio de carteira.
-- [ ] Criar simulador de aporte com base no valor disponível.
+- [x] Exibir perfil do usuário (nome, email, foto via Google)
+- [x] Seleção de tema (Claro / Escuro / Sistema) com persistência
+- [x] Seções placeholder para Segurança e Notificações
+- [ ] Implementar edição de perfil com persistência no Supabase
+- [ ] Implementar toggle funcional de 2FA
+- [ ] Implementar definição de perfil de risco (Conservador / Moderado / Arrojado)
 
-## 3.2 Alertas e Insights de Volatilidade
+### 1.6 Tema e UI
 
-- [ ] Implementar sistema de notificações (Push/E-mail) para quedas de X%.
-- [ ] Gerar relatório semanal de rentabilidade comparativo (vs. CDI/IBOV).
+- [x] Implementar ThemeProvider com suporte a dark mode
+- [x] Hook `useTheme` para controle de tema
+- [x] Design system consistente (cores violet, bordas, sombras, transições)
 
-# 📄 Épico 4: Inteligência de RI (Relações com Investidores) & LLM
+---
 
-## 4.1 Analisador de PDF de RI com LLM
-- [ ] Configurar pipeline de RAG com Gemini API.
-- [ ] Implementar extração automática (Receita, EBITDA, Lucro).
-- [ ] Criar chat interativo para perguntas sobre o PDF.
+## Fase 2 — Backend e Integrações
 
-## 4.2 Monitor de Documentos (Scraping)
-- [ ] Desenvolver scraper para sites de RI e CVM.
-- [ ] Implementar lógica de monitorização baseada em tickers favoritos.
+### 2.1 Backend (FastAPI)
 
-# 📱 Épico 5: Gestão de Gastos (Foco Mobile)
+- [ ] Estruturar projeto FastAPI na pasta `backend/`
+- [ ] Configurar conexão com Supabase (PostgreSQL)
+- [ ] Criar endpoints de autenticação (validar JWT do Supabase)
+- [ ] Migrar chamadas diretas do frontend ao Supabase para passar pelo backend
 
-## 5.1 Entrada Rápida de Gastos
-- [ ] Criar widget/atalho "Quick Add" na Home do App.
-- [ ] Implementar categorização automática via NLP (Ex: "Starbucks" -> "Alimentação").
+### 2.2 Integração com APIs de Cotações
 
-## 5.2 OCR de Boletos e Notas Fiscais
+- [ ] Integrar API de cotações (Yahoo Finance / Brapi) no backend
+- [ ] Endpoint para busca de tickers com autocomplete
+- [ ] Endpoint para cotação atual de um ativo
+- [ ] Atualização periódica de preços (cron job ou webhook)
 
-- [ ] Integrar câmara para leitura de QR Code/Código de Barras.
-- [ ] Implementar extração de dados do boleto (Valor, Vencimento, Nome).
+### 2.3 Gestão de Carteira (Backend)
 
-# 📅 Roadmap de Entrega
-- [ ] Fase 1: MVP Web (Auth + Carteira + Rebalanceamento)
-- [ ] Fase 2: Mobile Base (Lançamento de Gastos)
-- [ ] Fase 3: Intelligence (Integração LLM + Insights)
-- [ ] Fase 4: Automation (Scrapers + OCR avançado)
+- [ ] Endpoint de CRUD de transações
+- [ ] Lógica de cálculo de preço médio ponderado
+- [ ] Cálculo de rentabilidade por ativo e total da carteira
+- [ ] Histórico de evolução patrimonial
+
+---
+
+## Fase 3 — Inteligência e Estratégia
+
+### 3.1 Estratégia de Alocação
+
+- [ ] UI de sliders para definir alocação alvo por classe (total = 100%)
+- [ ] Barras de progresso: alocação atual vs. meta
+- [ ] Sugestão de aporte "Buy the Gap" (reequilíbrio automático)
+- [ ] Simulador de aporte com base no valor disponível
+
+### 3.2 Alertas e Insights
+
+- [ ] Sistema de notificações para quedas de X%
+- [ ] Relatório semanal de rentabilidade comparativo (vs. CDI / IBOV)
+- [ ] Alertas de preço-alvo por ativo
+
+---
+
+## Fase 4 — IA e Análise de Documentos
+
+### 4.1 Analisador de PDF de RI com LLM
+
+- [ ] Pipeline de RAG com Gemini API
+- [ ] Extração automática de indicadores (Receita, EBITDA, Lucro)
+- [ ] Chat interativo para perguntas sobre documentos
+
+### 4.2 Monitor de Documentos (Scraping)
+
+- [ ] Scraper para sites de RI e CVM (Playwright)
+- [ ] Monitoramento baseado nos tickers favoritos do usuário
+
+---
+
+## Fase 5 — Mobile
+
+### 5.1 App Mobile (React Native / Expo)
+
+- [ ] Setup do projeto Expo
+- [ ] Telas de login e dashboard mobile
+- [ ] Widget "Quick Add" para lançamento rápido de gastos
+- [ ] Categorização automática de gastos via NLP
+
+### 5.2 OCR de Boletos e Notas Fiscais
+
+- [ ] Leitura de QR Code / Código de Barras via câmera
+- [ ] Extração de dados do boleto (Valor, Vencimento, Nome)
