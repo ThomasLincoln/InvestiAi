@@ -1,23 +1,23 @@
-import { useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
-import { useLoaderData, useOutletContext } from "react-router";
-import { Save, Shield, Mail, Camera, Bell, Palette, Sun, Moon, Monitor } from "lucide-react";
-import { useTheme } from "~/hooks/useTheme";
-import type { User as UserType } from "~/types";
+import { useState } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
+import { useLoaderData, useOutletContext } from 'react-router';
+import { Save, Shield, Mail, Camera, Bell, Palette, Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from '~/hooks/useTheme';
+import type { User as UserType } from '~/types';
 
 export async function loader() {
   return {
     env: {
-      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || "",
-      VITE_SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "",
-    }
-  }
+      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || '',
+      VITE_SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '',
+    },
+  };
 }
 
 const themeOptions = [
-  { value: "light" as const, label: "Claro", icon: Sun },
-  { value: "dark" as const, label: "Escuro", icon: Moon },
-  { value: "system" as const, label: "Sistema", icon: Monitor },
+  { value: 'light' as const, label: 'Claro', icon: Sun },
+  { value: 'dark' as const, label: 'Escuro', icon: Moon },
+  { value: 'system' as const, label: 'Sistema', icon: Monitor },
 ];
 
 export default function Settings() {
@@ -32,22 +32,24 @@ export default function Settings() {
   const { user } = useOutletContext<{ user: UserType | null }>();
   const { theme, setTheme } = useTheme();
   const [profile, setProfile] = useState({
-    name: user?.fullname ?? "",
-    email: user?.email ?? ""
+    name: user?.fullname ?? '',
+    email: user?.email ?? '',
   });
 
   const initials = profile.name
-    .split(" ")
-    .map(n => n[0])
+    .split(' ')
+    .map((n) => n[0])
     .slice(0, 2)
-    .join("")
+    .join('')
     .toUpperCase();
 
   return (
     <div className="w-full">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Configurações</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Gerencie seu perfil e preferências</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Gerencie seu perfil e preferências
+        </p>
       </div>
 
       <div className="space-y-6">
@@ -64,14 +66,20 @@ export default function Settings() {
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-2xl border-4 border-white dark:border-gray-800 bg-violet-100 dark:bg-violet-900/40
-                    flex items-center justify-center shadow-lg">
-                    <span className="text-xl font-bold text-violet-600 dark:text-violet-400">{initials}</span>
+                  <div
+                    className="w-20 h-20 rounded-2xl border-4 border-white dark:border-gray-800 bg-violet-100 dark:bg-violet-900/40
+                    flex items-center justify-center shadow-lg"
+                  >
+                    <span className="text-xl font-bold text-violet-600 dark:text-violet-400">
+                      {initials}
+                    </span>
                   </div>
                 )}
-                <button className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/30
+                <button
+                  className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/30
                   flex items-center justify-center opacity-0 group-hover:opacity-100
-                  transition-all cursor-pointer">
+                  transition-all cursor-pointer"
+                >
                   <Camera size={18} className="text-white" />
                 </button>
               </div>
@@ -80,7 +88,9 @@ export default function Settings() {
 
           <div className="pt-14 px-6 pb-6">
             <div className="mb-5">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{profile.name}</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {profile.name}
+              </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">{profile.email}</p>
             </div>
 
@@ -94,7 +104,7 @@ export default function Settings() {
                     name="username"
                     type="text"
                     value={profile.name}
-                    onChange={e => setProfile({ ...profile, name: e.target.value })}
+                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                     className="w-full h-11 px-4 rounded-xl border border-gray-200 dark:border-gray-600
                       bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white
                       focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400
@@ -107,8 +117,10 @@ export default function Settings() {
                   <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     E-mail
                   </label>
-                  <div className="flex items-center gap-3 h-11 px-4 rounded-xl
-                    border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-500 dark:text-gray-400">
+                  <div
+                    className="flex items-center gap-3 h-11 px-4 rounded-xl
+                    border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-500 dark:text-gray-400"
+                  >
                     <Mail size={16} className="text-gray-400 dark:text-gray-500 shrink-0" />
                     <span className="truncate">{profile.email}</span>
                   </div>
@@ -144,9 +156,10 @@ export default function Settings() {
                       className={`
                         flex-1 flex flex-col items-center gap-2 py-3 px-2 rounded-xl
                         border-2 transition-all cursor-pointer text-sm font-medium
-                        ${active
-                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300'
-                          : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500'
+                        ${
+                          active
+                            ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300'
+                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500'
                         }
                       `}
                     >
@@ -168,8 +181,16 @@ export default function Settings() {
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Segurança</h2>
             </div>
             <div className="p-5 space-y-3">
-              <SettingsRow label="Autenticação dois fatores" description="Adicione uma camada extra de proteção" defaultEnabled={false} />
-              <SettingsRow label="Login com Google" description="Vinculado à sua conta" defaultEnabled={true} />
+              <SettingsRow
+                label="Autenticação dois fatores"
+                description="Adicione uma camada extra de proteção"
+                defaultEnabled={false}
+              />
+              <SettingsRow
+                label="Login com Google"
+                description="Vinculado à sua conta"
+                defaultEnabled={true}
+              />
             </div>
           </section>
 
@@ -182,19 +203,29 @@ export default function Settings() {
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Notificações</h2>
             </div>
             <div className="p-5 space-y-3">
-              <SettingsRow label="Alertas de preço" description="Quando um ativo atingir seu alvo" defaultEnabled={false} />
-              <SettingsRow label="Relatório semanal" description="Resumo da sua carteira por e-mail" defaultEnabled={false} />
+              <SettingsRow
+                label="Alertas de preço"
+                description="Quando um ativo atingir seu alvo"
+                defaultEnabled={false}
+              />
+              <SettingsRow
+                label="Relatório semanal"
+                description="Resumo da sua carteira por e-mail"
+                defaultEnabled={false}
+              />
             </div>
           </section>
         </div>
 
         {/* Save */}
         <div className="flex justify-end pt-2">
-          <button className="flex items-center gap-2 px-5 py-2.5
+          <button
+            className="flex items-center gap-2 px-5 py-2.5
             text-white bg-violet-600 rounded-xl text-sm font-medium
             hover:bg-violet-500 active:bg-violet-700
             transition-all shadow-lg shadow-violet-600/25
-            hover:shadow-violet-500/40 hover:scale-[1.02]">
+            hover:shadow-violet-500/40 hover:scale-[1.02]"
+          >
             <Save size={16} />
             Salvar Alterações
           </button>
@@ -204,7 +235,15 @@ export default function Settings() {
   );
 }
 
-function SettingsRow({ label, description, defaultEnabled }: { label: string; description: string; defaultEnabled: boolean }) {
+function SettingsRow({
+  label,
+  description,
+  defaultEnabled,
+}: {
+  label: string;
+  description: string;
+  defaultEnabled: boolean;
+}) {
   const [enabled, setEnabled] = useState(defaultEnabled);
 
   return (
@@ -221,10 +260,12 @@ function SettingsRow({ label, description, defaultEnabled }: { label: string; de
           ${enabled ? 'bg-violet-600' : 'bg-gray-200 dark:bg-gray-600'}
         `}
       >
-        <div className={`
+        <div
+          className={`
           absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform
           ${enabled ? 'translate-x-5' : 'translate-x-1'}
-        `} />
+        `}
+        />
       </button>
     </div>
   );

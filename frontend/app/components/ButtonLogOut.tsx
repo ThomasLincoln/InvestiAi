@@ -5,19 +5,19 @@ interface ButtonLogOutProps {
   supabase: SupabaseClient;
 }
 
-export default function ButtonLogOut({supabase} : ButtonLogOutProps) {
+export default function ButtonLogOut({ supabase }: ButtonLogOutProps) {
   const navigate = useNavigate();
   async function signOut() {
-    console.log("Objeto supabase recebido:", supabase);
+    console.log('Objeto supabase recebido:', supabase);
     if (supabase && supabase.auth) {
       await supabase.auth.signOut();
-      navigate("/");
+      navigate('/');
     } else {
-      console.error("Erro: O cliente Supabase está incompleto ou mal formado.");
+      console.error('Erro: O cliente Supabase está incompleto ou mal formado.');
     }
   }
   return (
-    <button id="logout-btn" onClick={signOut} className='select-none '>
+    <button id="logout-btn" onClick={signOut} className="select-none ">
       Sair
     </button>
   );

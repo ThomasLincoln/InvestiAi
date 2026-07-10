@@ -21,21 +21,21 @@ Modal para registrar uma nova operacao de investimento. Centraliza o estado de t
 
 ### Props
 
-| Prop | Tipo | Descricao |
-|------|------|-----------|
+| Prop    | Tipo      | Descricao                                |
+| ------- | --------- | ---------------------------------------- |
 | `items` | `Ativo[]` | Lista de ativos disponiveis para selecao |
 
 ### Estado Interno
 
-| Estado | Tipo | Descricao |
-|--------|------|-----------|
-| `isOpen` | `boolean` | Controla visibilidade do modal |
-| `ativo` | `Ativo \| null` | Ativo selecionado |
-| `quantidade` | `number` | Quantidade de cotas/acoes |
-| `dataAquisicao` | `string` | Data da compra (formato `YYYY-MM-DD`) |
-| `precoUnitario` | `number` | Preco por unidade |
-| `valorTotal` | `number` | Valor total da operacao |
-| `moeda` | `Moeda` | Moeda selecionada (BRL, USD) |
+| Estado          | Tipo            | Descricao                             |
+| --------------- | --------------- | ------------------------------------- |
+| `isOpen`        | `boolean`       | Controla visibilidade do modal        |
+| `ativo`         | `Ativo \| null` | Ativo selecionado                     |
+| `quantidade`    | `number`        | Quantidade de cotas/acoes             |
+| `dataAquisicao` | `string`        | Data da compra (formato `YYYY-MM-DD`) |
+| `precoUnitario` | `number`        | Preco por unidade                     |
+| `valorTotal`    | `number`        | Valor total da operacao               |
+| `moeda`         | `Moeda`         | Moeda selecionada (BRL, USD)          |
 
 ### Comportamento
 
@@ -60,21 +60,21 @@ Input monetario com prefixo de simbolo (R$, $), formatacao com virgula e seletor
 
 ### Props
 
-| Prop | Tipo | Descricao |
-|------|------|-----------|
-| `valor` | `number` | Valor numerico atual |
-| `moeda` | `Moeda` | Moeda selecionada |
+| Prop            | Tipo                      | Descricao                   |
+| --------------- | ------------------------- | --------------------------- |
+| `valor`         | `number`                  | Valor numerico atual        |
+| `moeda`         | `Moeda`                   | Moeda selecionada           |
 | `onValorChange` | `(valor: number) => void` | Callback ao alterar o valor |
-| `onMoedaChange` | `(moeda: Moeda) => void` | Callback ao trocar a moeda |
+| `onMoedaChange` | `(moeda: Moeda) => void`  | Callback ao trocar a moeda  |
 
 ### Exports Auxiliares
 
-| Export | Tipo | Descricao |
-|--------|------|-----------|
-| `moedas` | `const array` | Lista de moedas disponiveis (`BRL`, `USD`) |
-| `Moeda` | `type` | Tipo de uma moeda (`{ codigo, nome, simbolo, Bandeira }`) |
-| `formatarMoeda(valor)` | `function` | Converte `number` para string com virgula (`1234.5` → `"1234,50"`) |
-| `parsearValor(texto)` | `function` | Extrai numero de uma string formatada (`"1.234,50"` → `12.345`) |
+| Export                 | Tipo          | Descricao                                                          |
+| ---------------------- | ------------- | ------------------------------------------------------------------ |
+| `moedas`               | `const array` | Lista de moedas disponiveis (`BRL`, `USD`)                         |
+| `Moeda`                | `type`        | Tipo de uma moeda (`{ codigo, nome, simbolo, Bandeira }`)          |
+| `formatarMoeda(valor)` | `function`    | Converte `number` para string com virgula (`1234.5` → `"1234,50"`) |
+| `parsearValor(texto)`  | `function`    | Extrai numero de uma string formatada (`"1.234,50"` → `12.345`)    |
 
 ### Comportamento
 
@@ -86,12 +86,7 @@ Input monetario com prefixo de simbolo (R$, $), formatacao com virgula e seletor
 ### Uso
 
 ```tsx
-<InputCurrency
-    valor={preco}
-    moeda={moeda}
-    onValorChange={setPreco}
-    onMoedaChange={setMoeda}
-/>
+<InputCurrency valor={preco} moeda={moeda} onValorChange={setPreco} onMoedaChange={setMoeda} />
 ```
 
 ---
@@ -104,30 +99,30 @@ Seletor de ativos com busca por ticker ou nome, navegacao por teclado e destaque
 
 ### Props
 
-| Prop | Tipo | Default | Descricao |
-|------|------|---------|-----------|
-| `items` | `Ativo[]` | — | Lista de ativos disponiveis |
-| `placeholder` | `string` | — | Texto exibido quando nenhum ativo esta selecionado |
-| `value` | `Ativo \| null` | `null` | Ativo selecionado (componente controlado) |
-| `onChange` | `(option: Ativo) => void` | `undefined` | Callback ao selecionar um ativo |
+| Prop          | Tipo                      | Default     | Descricao                                          |
+| ------------- | ------------------------- | ----------- | -------------------------------------------------- |
+| `items`       | `Ativo[]`                 | —           | Lista de ativos disponiveis                        |
+| `placeholder` | `string`                  | —           | Texto exibido quando nenhum ativo esta selecionado |
+| `value`       | `Ativo \| null`           | `null`      | Ativo selecionado (componente controlado)          |
+| `onChange`    | `(option: Ativo) => void` | `undefined` | Callback ao selecionar um ativo                    |
 
 ### Navegacao por Teclado
 
-| Tecla | Acao |
-|-------|------|
-| `ArrowDown` | Move selecao para baixo |
-| `ArrowUp` | Move selecao para cima |
-| `Enter` | Confirma o item selecionado |
-| `Escape` | Fecha o dropdown |
+| Tecla       | Acao                        |
+| ----------- | --------------------------- |
+| `ArrowDown` | Move selecao para baixo     |
+| `ArrowUp`   | Move selecao para cima      |
+| `Enter`     | Confirma o item selecionado |
+| `Escape`    | Fecha o dropdown            |
 
 ### Uso
 
 ```tsx
 <ComboboxAtivo
-    items={ativos}
-    placeholder="Buscar ativo..."
-    value={ativoSelecionado}
-    onChange={setAtivoSelecionado}
+  items={ativos}
+  placeholder="Buscar ativo..."
+  value={ativoSelecionado}
+  onChange={setAtivoSelecionado}
 />
 ```
 
@@ -141,20 +136,20 @@ Tabela que exibe os ativos na carteira do usuario usando componentes do MUI.
 
 ### Props
 
-| Prop | Tipo | Descricao |
-|------|------|-----------|
+| Prop    | Tipo      | Descricao                   |
+| ------- | --------- | --------------------------- |
 | `items` | `Ativo[]` | Lista de ativos na carteira |
 
 ### Colunas
 
-| Coluna | Origem |
-|--------|--------|
-| Ativo | `nome` + `ticker` |
-| Quantidade | `quantidade` |
+| Coluna      | Origem                     |
+| ----------- | -------------------------- |
+| Ativo       | `nome` + `ticker`          |
+| Quantidade  | `quantidade`               |
 | Preco Medio | — (ainda nao implementado) |
 | Preco Atual | — (ainda nao implementado) |
-| Variacao | — (ainda nao implementado) |
-| Saldo | — (ainda nao implementado) |
+| Variacao    | — (ainda nao implementado) |
+| Saldo       | — (ainda nao implementado) |
 
 ---
 
@@ -166,10 +161,10 @@ Card que exibe o patrimonio total do usuario com indicador de variacao.
 
 ### Props
 
-| Prop | Tipo | Descricao |
-|------|------|-----------|
-| `valorTotal` | `number` | Valor total do patrimonio |
-| `mudanca` | `{ crescimento?: boolean, porcentagem: number }` | Dados de variacao percentual |
+| Prop         | Tipo                                             | Descricao                    |
+| ------------ | ------------------------------------------------ | ---------------------------- |
+| `valorTotal` | `number`                                         | Valor total do patrimonio    |
+| `mudanca`    | `{ crescimento?: boolean, porcentagem: number }` | Dados de variacao percentual |
 
 ### Uso
 
@@ -187,19 +182,19 @@ Sidebar de navegacao colapsavel com links para as paginas do dashboard.
 
 ### Props
 
-| Prop | Tipo | Descricao |
-|------|------|-----------|
-| `isOpen` | `boolean` | Se a sidebar esta expandida |
-| `toggle` | `() => void` | Alterna entre expandida/colapsada |
+| Prop       | Tipo             | Descricao                           |
+| ---------- | ---------------- | ----------------------------------- |
+| `isOpen`   | `boolean`        | Se a sidebar esta expandida         |
+| `toggle`   | `() => void`     | Alterna entre expandida/colapsada   |
 | `supabase` | `SupabaseClient` | Instancia do Supabase (para logout) |
 
 ### Itens de Navegacao
 
-| Nome | Rota | Icone |
-|------|------|-------|
-| Inicio | `/dashboard` | `home` |
-| Meus Ativos | `/dashboard/wallet` | `trending_up` |
-| Configuracoes | `/dashboard/settings` | `settings` |
+| Nome          | Rota                  | Icone         |
+| ------------- | --------------------- | ------------- |
+| Inicio        | `/dashboard`          | `home`        |
+| Meus Ativos   | `/dashboard/wallet`   | `trending_up` |
+| Configuracoes | `/dashboard/settings` | `settings`    |
 
 ---
 
@@ -211,8 +206,8 @@ Campo de busca com filtragem em tempo real por ticker.
 
 ### Props
 
-| Prop | Tipo | Descricao |
-|------|------|-----------|
+| Prop    | Tipo      | Descricao                   |
+| ------- | --------- | --------------------------- |
 | `items` | `Ativo[]` | Lista de ativos para buscar |
 
 > **Nota:** Este componente esta comentado no `wallet.tsx` e nao esta em uso ativo.
@@ -227,6 +222,6 @@ Botao que encerra a sessao do usuario via Supabase e redireciona para `/`.
 
 ### Props
 
-| Prop | Tipo | Descricao |
-|------|------|-----------|
+| Prop       | Tipo             | Descricao                                     |
+| ---------- | ---------------- | --------------------------------------------- |
 | `supabase` | `SupabaseClient` | Instancia do Supabase para chamar `signOut()` |

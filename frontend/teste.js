@@ -1,13 +1,13 @@
 import { promisify } from 'util';
 import YahooFinance from 'yahoo-finance2';
-const yahooFinance = new YahooFinance()
+const yahooFinance = new YahooFinance();
 
 const b3Tickers = [
   'PETR4.SA', // Petrobras PN
   'VALE3.SA', // Vale ON
   'ITUB4.SA', // Itaúsa PN
   'BBDC4.SA', // Bradesco PN
-  'ABEV3.SA'   // Ambev ON
+  'ABEV3.SA', // Ambev ON
 ];
 
 async function getStockData(ticker) {
@@ -22,7 +22,7 @@ async function getStockData(ticker) {
       name: stock.shortName || 'N/A',
       price: stock.regularMarketPrice,
       change: stock.regularMarketChangePercent,
-      marketCap: stock.marketCap // CORREÇÃO 2: Removido o formatNumber
+      marketCap: stock.marketCap, // CORREÇÃO 2: Removido o formatNumber
     };
   } catch (e) {
     // CORREÇÃO 3: Usar 'e.message' e não 'error.message'
@@ -44,7 +44,7 @@ async function getStockData(ticker) {
         }
       } catch (e) {
         console.log(`Ativo inválido ou indisponível no momento:`, ticker);
-        console.log(e.message)
+        console.log(e.message);
       }
     }
     console.log(`\nTotal de Ativos Encontrados: ${stockData.length}`);

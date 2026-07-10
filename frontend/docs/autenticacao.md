@@ -73,10 +73,10 @@ Os arquivos `app/loader/loader.tsx` e `app/actions/action.tsx` contem a configur
 
 ## Tabela de Referencia
 
-| Componente/Arquivo | Responsabilidade |
-|--------------------|-----------------|
-| `welcome/login.tsx` | Renderiza botao Google, processa credential |
-| `routes/dashboard.tsx` | Verifica sessao, carrega perfil |
-| `components/ButtonLogOut.tsx` | Encerra sessao |
-| `loader/loader.tsx` | Template de loader SSR com Supabase |
-| `actions/action.tsx` | Template de action SSR com Supabase |
+| Componente/Arquivo            | Responsabilidade                            |
+| ----------------------------- | ------------------------------------------- |
+| `welcome/login.tsx`           | Renderiza botao Google, processa credential |
+| `routes/dashboard.tsx`        | Verifica sessao, carrega perfil             |
+| `components/ButtonLogOut.tsx` | Encerra sessao                              |
+| `loader/loader.tsx`           | Template de loader SSR com Supabase         |
+| `actions/action.tsx`          | Template de action SSR com Supabase         |

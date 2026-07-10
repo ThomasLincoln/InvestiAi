@@ -34,6 +34,17 @@ npm run dev
 
 Your application will be available at `http://localhost:5173`.
 
+## Linting & Formatting
+
+This project uses [ESLint](https://eslint.org/) (flat config, `eslint.config.js`) for code quality and [Prettier](https://prettier.io/) for formatting, run as separate tools.
+
+```bash
+npm run lint          # check for lint issues
+npm run lint:fix      # auto-fix lint issues where possible
+npm run format        # format all files with Prettier
+npm run format:check  # check formatting without writing changes
+```
+
 ## Building for Production
 
 Create a production build:

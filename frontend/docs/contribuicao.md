@@ -33,24 +33,24 @@ npm run build
 
 ## Scripts Disponiveis
 
-| Script | Comando | Descricao |
-|--------|---------|-----------|
-| `dev` | `react-router dev` | Servidor de desenvolvimento com HMR |
-| `build` | `react-router build` | Build de producao |
-| `start` | `react-router-serve ./build/server/index.js` | Serve o build de producao |
-| `typecheck` | `react-router typegen && tsc` | Gera tipos das rotas e verifica tipagem |
+| Script      | Comando                                      | Descricao                               |
+| ----------- | -------------------------------------------- | --------------------------------------- |
+| `dev`       | `react-router dev`                           | Servidor de desenvolvimento com HMR     |
+| `build`     | `react-router build`                         | Build de producao                       |
+| `start`     | `react-router-serve ./build/server/index.js` | Serve o build de producao               |
+| `typecheck` | `react-router typegen && tsc`                | Gera tipos das rotas e verifica tipagem |
 
 ## Convencoes de Codigo
 
 ### Estrutura de Arquivos
 
-| Tipo | Diretorio | Convencao de nome |
-|------|-----------|-------------------|
-| Rotas | `app/routes/` | `camelCase.tsx` (ex: `dashboardInicio.tsx`) |
-| Componentes | `app/components/` | `PascalCase.tsx` (ex: `InputCurrency.tsx`) |
-| Tipos | `app/types.tsx` | Arquivo unico compartilhado |
-| Loaders SSR | `app/loader/` | `loader.tsx` |
-| Actions SSR | `app/actions/` | `action.tsx` |
+| Tipo        | Diretorio         | Convencao de nome                           |
+| ----------- | ----------------- | ------------------------------------------- |
+| Rotas       | `app/routes/`     | `camelCase.tsx` (ex: `dashboardInicio.tsx`) |
+| Componentes | `app/components/` | `PascalCase.tsx` (ex: `InputCurrency.tsx`)  |
+| Tipos       | `app/types.tsx`   | Arquivo unico compartilhado                 |
+| Loaders SSR | `app/loader/`     | `loader.tsx`                                |
+| Actions SSR | `app/actions/`    | `action.tsx`                                |
 
 ### Estilizacao
 
@@ -76,17 +76,17 @@ npm run build
 
 ```ts
 interface User {
-    fullname: string;
-    email: string;
-    picture: string;
-    saldo: number;
+  fullname: string;
+  email: string;
+  picture: string;
+  saldo: number;
 }
 
 interface Ativo {
-    id?: string;
-    ticker: string;
-    nome: string;
-    quantidade?: number;
+  id?: string;
+  ticker: string;
+  nome: string;
+  quantidade?: number;
 }
 ```
 

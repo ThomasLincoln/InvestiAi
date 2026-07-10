@@ -60,8 +60,8 @@ frontend/
 
 ### Banco de Dados (Supabase)
 
-| Tabela | Uso |
-|--------|-----|
-| `perfil_pessoal` | Dados do usuario (nome, email, foto, saldo) |
-| `ativos_base` | Catalogo de ativos disponiveis |
+| Tabela               | Uso                                                    |
+| -------------------- | ------------------------------------------------------ |
+| `perfil_pessoal`     | Dados do usuario (nome, email, foto, saldo)            |
+| `ativos_base`        | Catalogo de ativos disponiveis                         |
 | `ativos_na_carteira` | Ativos do usuario com quantidade e referencia ao ativo |
