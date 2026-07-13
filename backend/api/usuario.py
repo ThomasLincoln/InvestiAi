@@ -36,6 +36,45 @@ def lerAtivos_usuario(usuario_id: str = Depends(obter_usuario_atual)):
         return dados_formatados
 
 
+@router.get("/ativosAgrupados")
+def lerAtivosAgrupados_usuario(usuario_id: str = Depends(obter_usuario_atual)):
+    print(f"👉 Rota /ativosAgrupados acessada pelo usuário: {usuario_id}")
+    print(usuario_id)
+    with Session(engine) as session:
+        query = (
+            select(transacoes, ativos_base)
+            .join(ativos_base, col(transacoes.Ativo) == ativos_base.id)
+            .where(transacoes.Usuario == usuario_id)
+        )
+        resultados = session.exec(query).all()
+
+        ativos_consolidados = {}
+        for transacao, ativo in resultados:
+            ticker = ativo.ticker
+            custo_da_transacao = transacao.Quantidade * transacao.preco_unitario
+            if ticker not in ativos_consolidados:
+                ativos_consolidados[ticker] = {
+                    "Ativo": {"ticker": ticker, "nome": ativo.nome},
+                    "Quantidade": 0,
+                    "custo_total": 0.0,
+                }
+            ativos_consolidados[ticker]["Quantidade"] += transacao.Quantidade
+            ativos_consolidados[ticker]["custo_total"] += custo_da_transacao
+            print(ativos_consolidados)
+            dados_formatados = []
+            for ticker, dados in ativos_consolidados.items():
+                preco_medio = dados["custo_total"] / dados["Quantidade"]
+                dados_formatados.append(
+                    {
+                        "Ativo": dados["Ativo"],
+                        "Quantidade": dados["Quantidade"],
+                        "preco_medio": round(preco_medio, 2),
+                    }
+                )
+                print(dados_formatados)
+        return dados_formatados
+
+
 @router.post("/aportar_ativo")
 def aportar(
     dados_do_aporte: NovoAporte, usuario_id: str = Depends(obter_usuario_atual)

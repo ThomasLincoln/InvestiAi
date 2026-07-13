@@ -11,12 +11,14 @@ export interface Ativo {
   nome: string;
   quantidade?: number;
   preco?: number;
+  preco_medio?: number;
 }
 
 export interface TransacaoBackend {
   id: number;
   Quantidade: number;
-  preco_unitario: number;
+  preco_unitario?: number;
+  preco_medio?: number;
   Ativo: {
     ticker: string;
     nome: string;

@@ -1,7 +1,8 @@
 import type { Ativo } from '~/types';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, Minus } from 'lucide-react';
 
 export default function Ativos({ items, loading = false }: { items: Ativo[]; loading?: boolean }) {
+  console.log(items)
   if (loading) {
     return (
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors">
@@ -98,7 +99,9 @@ export default function Ativos({ items, loading = false }: { items: Ativo[]; loa
                   </span>
                 </td>
                 <td className="hidden sm:table-cell px-5 py-4 text-right">
-                  <span className="text-sm text-gray-400 dark:text-gray-500">-</span>
+                  <span className="text-sm text-gray-400 dark:text-gray-500">
+                    {item.preco_medio ?? '-'}
+                  </span>
                 </td>
                 <td className="hidden md:table-cell px-5 py-4 text-right">
                   <span className="text-sm text-gray-400 dark:text-gray-500">

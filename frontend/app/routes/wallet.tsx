@@ -45,7 +45,7 @@ export default function Settings() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    const response = await fetch(`${env.VITE_API_URL}/usuario/ativos`, {
+    const response = await fetch(`${env.VITE_API_URL}/usuario/ativosAgrupados`, {
       headers: {
         Authorization: session ? `Bearer ${session.access_token}` : '',
         'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ export default function Settings() {
           ticker: (item.Ativo as any).ticker,
           nome: (item.Ativo as any).nome,
           quantidade: item.Quantidade,
-          preco: item.preco_unitario,
+          preco_medio: item.preco_medio,
         };
       });
       console.log('dados transformados: ', dadosTransformados);
