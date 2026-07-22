@@ -3,7 +3,9 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useOutletContext, useLoaderData } from 'react-router';
 import { TrendingUp, PieChart, ArrowUpRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import type { User, Ativo } from '~/types';
+import type { User, Ativo, TransacaoBackend } from '~/types';
+import Ativos from '~/components/Ativos';
+
 
 
 export async function loader() {
@@ -28,6 +30,44 @@ export default function DashboardInicio() {
   const [ativos, setAtivos] = useState<Ativo[]>([]);
   const [carteira, setCarteira] = useState<Ativo[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchAtivos() {
+      const response = await fetch(`${env.VITE_API_URL}/ativos/`);
+      const data = await response.json();
+      setAtivos(data ?? []);
+    }
+
+    async function fetchCarteira() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const response = await fetch(`${env.VITE_API_URL}/usuario/ativosAgrupados`, {
+        headers: {
+          Authorization: session ? `Bearer ${session.access_token}` : '',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const ativosNaCarteira = await response.json();
+      if (ativosNaCarteira) {
+        const dadosBrutos = ativosNaCarteira ?? [];
+        const dadosTransformados = dadosBrutos.map((item: TransacaoBackend) => {
+          return {
+            id: item.id,
+            ticker: item.Ativo.ticker,
+            nome: item.Ativo.nome,
+            quantidade: item.Quantidade,
+            preco_medio: item.preco_medio,
+          };
+        });
+        console.log('dados transformados: ', dadosTransformados);
+        setCarteira(dadosTransformados ?? []);
+      }
+    }
+
+    Promise.all([fetchAtivos(), fetchCarteira()]).finally(() => setLoading(false));
+  }, []);
 
 
   if (!data) {
@@ -80,7 +120,7 @@ export default function DashboardInicio() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 p-10 flex flex-col items-center justify-center text-center transition-colors">
+      <div className="mb-8 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 p-10 flex flex-col items-center justify-center text-center transition-colors">
         <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/40 text-violet-500 dark:text-violet-400 mb-4">
           <TrendingUp size={24} />
         </div>
@@ -88,6 +128,9 @@ export default function DashboardInicio() {
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Acompanhe a evolução da sua carteira visualmente
         </p>
+      </div>
+      <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col items-center justify-center text-center transition-colors">
+        <Ativos items={carteira} loading={loading} />
       </div>
     </div>
   );

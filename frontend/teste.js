@@ -1,4 +1,3 @@
-import { promisify } from 'util';
 import YahooFinance from 'yahoo-finance2';
 const yahooFinance = new YahooFinance();
 
@@ -49,6 +48,6 @@ async function getStockData(ticker) {
     }
     console.log(`\nTotal de Ativos Encontrados: ${stockData.length}`);
   } catch (e) {
-    console.error('Erro na API:', error);
+    console.error('Erro na API:', e);
   }
 })();
