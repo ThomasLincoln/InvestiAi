@@ -14,7 +14,7 @@ export default function SideBarComponent({
 
   const navItems = [
     { name: 'Início', path: '/dashboard', icon: 'home' },
-    { name: 'Meus Ativos', path: '/dashboard/wallet', icon: 'trending_up' },
+    // { name: 'Meus Ativos', path: '/dashboard/wallet', icon: 'trending_up' },
     { name: 'Configurações', path: '/dashboard/settings', icon: 'settings' },
   ];
 
@@ -67,11 +67,10 @@ export default function SideBarComponent({
                                 group relative flex items-center gap-3 rounded-xl
                                 transition-all duration-200
                                 ${isOpen ? 'px-3 py-2.5' : 'justify-center py-2.5'}
-                                ${
-                                  active
-                                    ? 'bg-white/15 text-white shadow-lg shadow-violet-500/10'
-                                    : 'text-violet-300 hover:bg-white/8 hover:text-white'
-                                }
+                                ${active
+                  ? 'bg-white/15 text-white shadow-lg shadow-violet-500/10'
+                  : 'text-violet-300 hover:bg-white/8 hover:text-white'
+                }
                             `}
             >
               {active && (

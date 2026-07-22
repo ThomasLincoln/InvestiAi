@@ -1,10 +1,38 @@
 import PatrimonioTotal from '~/components/PatrimonioTotal';
-import { useOutletContext } from 'react-router';
+import { createBrowserClient } from '@supabase/ssr';
+import { useOutletContext, useLoaderData } from 'react-router';
 import { TrendingUp, PieChart, ArrowUpRight } from 'lucide-react';
-import type { User } from '~/types';
+import { useEffect, useState } from 'react';
+import type { User, Ativo } from '~/types';
+
+
+export async function loader() {
+  return {
+    env: {
+      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || '',
+      VITE_SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '',
+      VITE_API_URL: process.env.VITE_API_URL || '',
+    },
+  };
+}
 
 export default function DashboardInicio() {
   const { user } = useOutletContext<{ user: User }>() || {};
+  const data = useLoaderData();
+
+  const { env } = data as {
+    env: { VITE_SUPABASE_URL: string; VITE_SUPABASE_PUBLISHABLE_KEY: string; VITE_API_URL: string };
+  };
+  const supabase = createBrowserClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY);
+
+  const [ativos, setAtivos] = useState<Ativo[]>([]);
+  const [carteira, setCarteira] = useState<Ativo[]>([]);
+  const [loading, setLoading] = useState(true);
+
+
+  if (!data) {
+    return <h1>Erro: O loader não retornou dados.</h1>;
+  }
 
   const mudanca = {
     crescimento: true,
