@@ -38,7 +38,7 @@ py -3 -m venv venv
 ### 3. Instalar as Dependências
 
 ```powershell
-pip install fastapi uvicorn supabase python-dotenv sqlmodel apscheduler alembic psycopg2-binary apscheduler
+pip install fastapi uvicorn supabase python-dotenv sqlmodel apscheduler alembic psycopg2-binary apscheduler yfinance
 ```
 
 Lembrando que é importante criar o alembic.ini, caso necessário rodar o comando:

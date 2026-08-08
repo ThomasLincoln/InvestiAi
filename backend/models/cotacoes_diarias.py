@@ -2,7 +2,7 @@ from datetime import date
 from typing import Optional
 from sqlmodel import SQLModel, Field, Index
 
-class CotacoesDiarias(SQLModel, table =True):
+class cotacoes_diarias(SQLModel, table =True):
     __tablename__ = "cotacoes_diarias"
     __table_args__=(
         # Indice composto único: impede de uma cotacao tenha um registro no mesmo dia

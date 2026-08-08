@@ -3,7 +3,7 @@ from typing import Optional
 from sqlmodel import SQLModel,Field
 from uuid import UUID
 
-class HistoricoPatrimonio(SQLModel, table = True):
+class historico_patrimonio(SQLModel, table = True):
     __tablename__ = "historico_patrimonio"
     id: Optional[int] = Field(default=None, primary_key=True)
     usuario_id: UUID = Field(foreign_key="perfil_pessoal.id", index=True)
