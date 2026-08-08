@@ -1,10 +1,33 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
 
 from api import ativos
 from api import usuario
 
-app = FastAPI()
+scheduler = BackgroundScheduler()
+
+def rotina_teste_cotacoes():
+    """Função que simula ou busca as cotações e grava o snapshot."""
+    agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"⏰ [{agora}] Rodando atualização de cotações/patrimônio...")
+    
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    scheduler.add_job(rotina_teste_cotacoes, 'interval', minutes=1)
+    
+    # Quando for para produção, você só troca a linha acima por:
+    # scheduler.add_job(rotina_teste_cotacoes, 'cron', hour=23, minute=59)
+    
+    scheduler.start()
+    yield
+    scheduler.shutdown()    
+
+app = FastAPI(lifespan=lifespan)
 
 origins = ["http://localhost:5173"]
 

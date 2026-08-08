@@ -15,7 +15,7 @@ export interface Ativo {
 }
 
 export interface TransacaoBackend {
-  id: number;
+  ID: number;
   Quantidade: number;
   preco_unitario?: number;
   preco_medio?: number;
@@ -23,4 +23,10 @@ export interface TransacaoBackend {
     ticker: string;
     nome: string;
   };
+}
+
+export interface HistoricoAtivo {
+  data: string;
+  preco_unitario: number;
+  tipo: string;
 }

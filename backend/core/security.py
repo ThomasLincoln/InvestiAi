@@ -23,6 +23,7 @@ jwks_client = PyJWKClient(
 )
 
 def obter_usuario_atual(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    print("tentando buscar o usuário atual")
     token = credentials.credentials
     try:
         # Isso aqui vai buscar o key id dentro do token e vai retornar um
@@ -44,7 +45,8 @@ def obter_usuario_atual(credentials: HTTPAuthorizationCredentials = Depends(secu
         raise HTTPException(
             status_code=401, detail="Token expirado. Faça login novamente."
         )
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        print(f"Erro detalhado na validação do JWT: {e}")
         raise HTTPException(
             status_code=401, detail="Credenciais de segurança inválidas"
         )

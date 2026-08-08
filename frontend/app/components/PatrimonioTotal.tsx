@@ -32,11 +32,10 @@ export default function PatrimonioTotal({ valorTotal, mudanca }: PatrimonioProps
       <div
         className={`
                 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold
-                ${
-                  positivo
-                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                    : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                }
+                ${positivo
+            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+            : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+          }
             `}
       >
         {positivo ? <TrendingUp size={16} /> : <TrendingDown size={16} />}

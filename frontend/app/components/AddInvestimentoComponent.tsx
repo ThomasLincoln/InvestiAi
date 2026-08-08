@@ -26,6 +26,13 @@ export default function AddInvestimento({
   onAporteSucesso: () => void;
 }) {
   const data = useLoaderData();
+  const [isOpen, setIsOpen] = useState(false);
+  const [ativo, setAtivo] = useState<Ativo | null>(null);
+  const [quantidade, setQuantidade] = useState(0);
+  const [dataAquisicao, setDataAquisicao] = useState('');
+  const [precoUnitario, setPrecoUnitario] = useState(0);
+  const [valorTotal, setValorTotal] = useState(0);
+  const [moeda, setMoeda] = useState<Moeda>(moedas[0]);
 
   if (!data) {
     return <h1>Erro: O loader não retornou dados.</h1>;
@@ -34,13 +41,6 @@ export default function AddInvestimento({
     env: { VITE_SUPABASE_URL: string; VITE_SUPABASE_PUBLISHABLE_KEY: string; VITE_API_URL: string };
   };
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [ativo, setAtivo] = useState<Ativo | null>(null);
-  const [quantidade, setQuantidade] = useState(0);
-  const [dataAquisicao, setDataAquisicao] = useState('');
-  const [precoUnitario, setPrecoUnitario] = useState(0);
-  const [valorTotal, setValorTotal] = useState(0);
-  const [moeda, setMoeda] = useState<Moeda>(moedas[0]);
 
   const incrementar = () => setQuantidade(quantidade + 1);
   const decrementar = () => setQuantidade(quantidade > 0 ? quantidade - 1 : 0);

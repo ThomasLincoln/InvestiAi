@@ -2,10 +2,9 @@ import type { Ativo } from '~/types';
 import { TrendingUp, Minus } from 'lucide-react';
 
 export default function Ativos({ items, loading = false }: { items: Ativo[]; loading?: boolean }) {
-  console.log(items)
   if (loading) {
     return (
-      <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors">
+      <div className="overflow-hidden rounded-2xl w-full bg-white dark:bg-gray-800 transition-colors">
         <div className="divide-y divide-gray-100 dark:divide-gray-700">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-5 py-4 animate-pulse">
@@ -27,7 +26,7 @@ export default function Ativos({ items, loading = false }: { items: Ativo[]; loa
     return (
       <div
         className="flex flex-col items-center justify-center py-16 px-6
-                rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 transition-colors"
+                rounded-2xl transition-colors"
       >
         <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/40 text-violet-500 dark:text-violet-400 mb-4">
           <TrendingUp size={24} />
