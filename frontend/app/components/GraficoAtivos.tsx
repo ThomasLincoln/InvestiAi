@@ -3,13 +3,13 @@ import { ChartContainer, type ChartConfig, ChartTooltip, ChartTooltipContent } f
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 export default function GraficoAtivos({ historico }: { historico: any }) {
+  console.log(historico)
   const chartConfig = {
     investido: {
       label: "Valor Aplicado",
       color: "#2563eb",
     },
   } satisfies ChartConfig
-  console.log(historico)
   return (
     <ChartContainer config={chartConfig} className="min-h-50 max-h-100 w-full">
       <AreaChart accessibilityLayer data={historico} margin={{

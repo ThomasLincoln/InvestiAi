@@ -60,35 +60,39 @@ export async function loader({ request }: { request: Request }) {
   const ativos = await ativosRes.json();
   const ativosNaCarteira = await carteiraRes.json();
   const historico = await historicoAtivos.json();
-
-  let dadosTransformados;
-  let dadosBrutos
-  if (ativosNaCarteira) {
-    dadosBrutos = ativosNaCarteira ?? [];
-    dadosTransformados = dadosBrutos ? dadosBrutos.map((item: TransacaoBackend) => {
+  let dadosTransformados = [];
+  if (ativosNaCarteira && Array.isArray(ativosNaCarteira)) {
+    dadosTransformados = ativosNaCarteira.map((item: TransacaoBackend) => {
       return {
         id: item.ID,
         ticker: item.Ativo.ticker,
         nome: item.Ativo.nome,
         quantidade: item.Quantidade,
         preco_medio: item.preco_medio,
+        preco: item.preco
       };
-    }) : [];
+    });
+  } else {
+    console.error("A resposta da API para carteira não é um array:", ativosNaCarteira);
   }
   let saldoAcumulado = 0;
-  const chartData = historico?.map((item) => {
-    const totalGastoNoDia = item.transacoes.reduce((acc: number, transacao) => {
-      return acc + (transacao.quantidade * transacao.preco_unitario);
-    }, 0);
+  let chartData = [];
+  if (historico && Array.isArray(historico)) {
+    chartData = historico.map((item) => {
+      const totalGastoNoDia = item.transacoes.reduce((acc: number, transacao: any) => {
+        return acc + (transacao.quantidade * transacao.preco_unitario);
+      }, 0);
 
-    saldoAcumulado += totalGastoNoDia;
+      saldoAcumulado += totalGastoNoDia;
 
-    return {
-      data: item.data,
-      investido: saldoAcumulado,
-    }
-  }) ?? [];
-
+      return {
+        data: item.data,
+        investido: saldoAcumulado,
+      };
+    });
+  } else {
+    console.error("A resposta da API para histórico não é um array:", historico);
+  }
   const loading = false;
 
   return { env, ativos, carteira: dadosTransformados, supabase, loading, historico: chartData }

@@ -19,11 +19,7 @@ def rotina_teste_cotacoes():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    scheduler.add_job(rotina_teste_cotacoes, 'interval', minutes=1)
-    
-    # Quando for para produção, você só troca a linha acima por:
     scheduler.add_job(rotina_teste_cotacoes, 'cron', hour=23, minute=59)
-    
     scheduler.start()
     yield
     scheduler.shutdown()    

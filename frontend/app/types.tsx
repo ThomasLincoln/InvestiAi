@@ -17,7 +17,7 @@ export interface Ativo {
 export interface TransacaoBackend {
   ID: number;
   Quantidade: number;
-  preco_unitario?: number;
+  preco?: number;
   preco_medio?: number;
   Ativo: {
     ticker: string;

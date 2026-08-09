@@ -9,5 +9,3 @@ class ativos_base(SQLModel, table=True):
     ticker: str
     nome: str
     TickerConsulta: str
-    preco_atual: Optional[float] = Field(default=None)
-    ultima_atualizacao: Optional[float] = Field(default=None)

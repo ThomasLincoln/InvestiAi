@@ -2,6 +2,7 @@ import type { Ativo } from '~/types';
 import { TrendingUp, Minus } from 'lucide-react';
 
 export default function Ativos({ items, loading = false }: { items: Ativo[]; loading?: boolean }) {
+  console.log(items)
   if (loading) {
     return (
       <div className="overflow-hidden rounded-2xl w-full bg-white dark:bg-gray-800 transition-colors">
