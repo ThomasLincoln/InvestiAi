@@ -19,7 +19,7 @@ def read_ativos():
             .distinct(ativos_base.id)
         )
         resultados = session.exec(statement).all()
-        
+
         ativos = []
         for ativo, preco in resultados:
             ativos.append({

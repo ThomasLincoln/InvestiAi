@@ -1,8 +1,6 @@
-import ButtonLogOut from '~/components/ButtonLogOut';
-import { Link, Outlet, useLoaderData } from 'react-router';
+import { Outlet, useLoaderData } from 'react-router';
 import { createBrowserClient } from '@supabase/ssr';
 import { useState } from 'react';
-import PatrimonioTotal from '~/components/PatrimonioTotal';
 import SideBarComponent from '~/components/SideBarComponent';
 import MobileBottomNav from '~/components/MobileBottomNav';
 import LoadingScreen from '~/components/LoadingScreen';
@@ -42,6 +40,7 @@ export function HydrateFallback() {
 }
 
 export default function Dashboard() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const data = useLoaderData();
   if (!data) {
     return <h1>Erro: O loader não retornou dados.</h1>;
@@ -51,7 +50,6 @@ export default function Dashboard() {
     env: { VITE_SUPABASE_URL: string; VITE_SUPABASE_PUBLISHABLE_KEY: string };
   };
   const supabase = createBrowserClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-950 p-2 sm:p-4 gap-2 sm:gap-4 transition-colors">

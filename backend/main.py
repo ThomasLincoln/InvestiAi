@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
-from services.cotacoes_service import atualizar_cotacoes_e_patrimonio
+from services.cotacoes_service import atualizar_cotacoes_e_patrimonio, consolidar_patrimonio_dia_atual
+from services.yahoo_integration import get_actual_value_stock
 from api import ativos
 from api import usuario
 
@@ -13,13 +14,15 @@ def rotina_teste_cotacoes():
     """Função que simula ou busca as cotações e grava o snapshot."""
     agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"⏰ [{agora}] Rodando atualização de cotações/patrimônio...")
-    atualizar_cotacoes_e_patrimonio()
+    # atualizar_cotacoes_e_patrimonio()
+    # consolidar_patrimonio_dia_atual()
     
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    scheduler.add_job(rotina_teste_cotacoes, 'cron', hour=23, minute=59)
+async def lifespan(app: FastPI):
+    # scheduler.add_job(rotina_teste_cotacoes, 'cron', hour=19, minute=00)
+    scheduler.add_job(rotina_teste_cotacoes, 'interval', minutes=1)
     scheduler.start()
     yield
     scheduler.shutdown()    

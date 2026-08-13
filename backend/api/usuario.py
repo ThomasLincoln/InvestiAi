@@ -4,6 +4,7 @@ from core.database import engine
 from models.transacoes import transacoes
 from models.ativo_base import ativos_base
 from models.cotacoes_diarias import cotacoes_diarias
+from models.historico_patrimonio import historico_patrimonio
 from core.security import obter_usuario_atual
 from datetime import datetime, timezone
 from dto.UsuarioDTO import NovoAporte
@@ -139,4 +140,7 @@ def aportar(
 def get_historico_patrimonio(usuario_id: str):
     print(f"👉 Rota /historico_patrimonio acessada pelo usuário: {usuario_id}")
     with Session(engine) as session:
-        query = select(transacoes, )
+        query_encontrar_historico = (
+            select(historico_patrimonio)
+            .where(transacoes.Usuario == usuario_id)
+        )

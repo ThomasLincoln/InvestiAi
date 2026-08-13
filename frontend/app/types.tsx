@@ -12,6 +12,9 @@ export interface Ativo {
   quantidade?: number;
   preco?: number;
   preco_medio?: number;
+  variacao_reais?: number;
+  variacao_percentual?: number;
+  saldo?: number;
 }
 
 export interface TransacaoBackend {

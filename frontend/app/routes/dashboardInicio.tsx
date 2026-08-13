@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import PatrimonioTotal from '~/components/PatrimonioTotal';
 import AddInvestimento from '~/components/AddInvestimentoComponent';
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr';
 import { useOutletContext, useLoaderData, useRevalidator } from 'react-router';
 import { PieChart, ArrowUpRight } from 'lucide-react';
-import type { User, TransacaoBackend, HistoricoAtivo } from '~/types';
+import type { User, TransacaoBackend } from '~/types';
 import Ativos from '~/components/Ativos';
 import GraficoAtivos from '~/components/GraficoAtivos';
 
@@ -27,7 +28,7 @@ export async function loader({ request }: { request: Request }) {
             value: cookie.value ?? '',
           }));
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         setAll(cookiesToSet: any[]) {
           cookiesToSet.forEach(({ name, value, options }) =>
             headers.append('Set-Cookie', serializeCookieHeader(name, value, options))
@@ -60,23 +61,32 @@ export async function loader({ request }: { request: Request }) {
   const ativos = await ativosRes.json();
   const ativosNaCarteira = await carteiraRes.json();
   const historico = await historicoAtivos.json();
-  let dadosTransformados = [];
+  let dadosTransformados: { id: number; ticker: string; nome: string; quantidade: number; preco_medio: number | undefined; preco: number | undefined; }[] = [];
   if (ativosNaCarteira && Array.isArray(ativosNaCarteira)) {
     dadosTransformados = ativosNaCarteira.map((item: TransacaoBackend) => {
+      const precoAtual = item.preco || 0;
+      const precoMedio = item.preco_medio || 0;
+      const quantidade = item.Quantidade || 0;
+      const variacaoReais = precoAtual - precoMedio;
+      const variacaoPercentual = precoMedio > 0 ? ((precoAtual - precoMedio) / precoMedio) * 100 : 0;
+      const saldoTotal = quantidade * precoAtual;
       return {
         id: item.ID,
         ticker: item.Ativo.ticker,
         nome: item.Ativo.nome,
-        quantidade: item.Quantidade,
-        preco_medio: item.preco_medio,
-        preco: item.preco
+        quantidade: quantidade,
+        preco_medio: precoMedio,
+        preco: precoAtual,
+        variacao_reais: variacaoReais,
+        variacao_percentual: variacaoPercentual.toFixed(2),
+        saldo: saldoTotal.toFixed(2),
       };
     });
   } else {
     console.error("A resposta da API para carteira não é um array:", ativosNaCarteira);
   }
   let saldoAcumulado = 0;
-  let chartData = [];
+  let chartData: { data: any; investido: number; }[] = [];
   if (historico && Array.isArray(historico)) {
     chartData = historico.map((item) => {
       const totalGastoNoDia = item.transacoes.reduce((acc: number, transacao: any) => {

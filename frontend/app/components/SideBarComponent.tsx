@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link, useLocation } from 'react-router';
 import ButtonLogOut from './ButtonLogOut';
 
@@ -16,6 +17,7 @@ export default function SideBarComponent({
     { name: 'Início', path: '/dashboard', icon: 'home' },
     // { name: 'Meus Ativos', path: '/dashboard/wallet', icon: 'trending_up' },
     { name: 'Configurações', path: '/dashboard/settings', icon: 'settings' },
+    { name: 'Testes', path: '/dashboard/test', icon: 'science' }, // <- Nova rota adicionada
   ];
 
   function isActive(path: string) {

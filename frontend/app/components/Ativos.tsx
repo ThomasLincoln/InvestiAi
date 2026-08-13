@@ -1,8 +1,7 @@
 import type { Ativo } from '~/types';
-import { TrendingUp, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 export default function Ativos({ items, loading = false }: { items: Ativo[]; loading?: boolean }) {
-  console.log(items)
   if (loading) {
     return (
       <div className="overflow-hidden rounded-2xl w-full bg-white dark:bg-gray-800 transition-colors">
@@ -69,56 +68,77 @@ export default function Ativos({ items, loading = false }: { items: Ativo[]; loa
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {items.map((item) => (
-              <tr
-                key={item.id}
-                className="group hover:bg-violet-50/40 dark:hover:bg-violet-900/20 transition-colors"
-              >
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="flex items-center justify-center w-9 h-9
-                                            rounded-xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400
-                                            text-xs font-bold shrink-0"
+            {items.map((item) => {
+              const variacao = item.variacao_percentual || 0;
+
+              const isPositiva = variacao > 0;
+              const isNegativa = variacao < 0;
+              const isNeutro = variacao === 0;
+
+              const formataMoeda = (valor: number) =>
+                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+
+              return (
+                <tr
+                  key={item.id}
+                  className="group hover:bg-violet-50/40 dark:hover:bg-violet-900/20 transition-colors"
+                >
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 text-xs font-bold shrink-0">
+                        {item.ticker?.slice(0, 2)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {item.ticker}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-40">
+                          {item.nome}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 text-right">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      {item.quantidade ?? '—'}
+                    </span>
+                  </td>
+                  <td className="hidden sm:table-cell px-5 py-4 text-right">
+                    <span className="text-sm text-gray-400 dark:text-gray-500">
+                      {item.preco_medio ? formataMoeda(item.preco_medio) : '-'}
+                    </span>
+                  </td>
+                  <td className="hidden md:table-cell px-5 py-4 text-right">
+                    <span className="text-sm text-gray-400 dark:text-gray-500">
+                      {item.preco ? formataMoeda(item.preco) : '-'}
+                    </span>
+                  </td>
+
+                  {/* --- COLUNA DA VARIAÇÃO ATUALIZADA --- */}
+                  <td className="hidden md:table-cell px-5 py-4 text-right">
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg ${isPositiva ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        isNegativa ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                          'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                        }`}
                     >
-                      {item.ticker?.slice(0, 2)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {item.ticker}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-40">
-                        {item.nome}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-5 py-4 text-right">
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {item.quantidade ?? '—'}
-                  </span>
-                </td>
-                <td className="hidden sm:table-cell px-5 py-4 text-right">
-                  <span className="text-sm text-gray-400 dark:text-gray-500">
-                    {item.preco_medio ?? '-'}
-                  </span>
-                </td>
-                <td className="hidden md:table-cell px-5 py-4 text-right">
-                  <span className="text-sm text-gray-400 dark:text-gray-500">
-                    {item.preco ?? '-'}
-                  </span>
-                </td>
-                <td className="hidden md:table-cell px-5 py-4 text-right">
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-lg">
-                    <Minus size={12} />
-                    0,00%
-                  </span>
-                </td>
-                <td className="px-5 py-4 text-right">
-                  <span className="text-sm text-gray-400 dark:text-gray-500">—</span>
-                </td>
-              </tr>
-            ))}
+                      {/* Renderização condicional do ícone */}
+                      {isPositiva && <TrendingUp size={12} />}
+                      {isNegativa && <TrendingDown size={12} />}
+                      {isNeutro && <Minus size={12} />}
+
+                      {Math.abs(variacao).toFixed(2).replace('.', ',')}%
+                    </span>
+                  </td>
+
+                  <td className="px-5 py-4 text-right">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {item.saldo ? formataMoeda(item.saldo) : '—'}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
