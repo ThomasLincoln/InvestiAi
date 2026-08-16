@@ -17,6 +17,7 @@ export function ComboboxAtivo({
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+
   const selected = value;
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -59,12 +60,6 @@ export function ComboboxAtivo({
   };
 
   useEffect(() => {
-    if (!isOpen) return;
-    const index = selected ? ativosFiltrados.findIndex((opt) => opt.id === selected.id) : 0;
-    setSelectedIndex(index >= 0 ? index : 0);
-  }, [isOpen, selected, ativosFiltrados]);
-
-  useEffect(() => {
     function handleClickFora(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
@@ -74,19 +69,27 @@ export function ComboboxAtivo({
     return () => document.removeEventListener('mousedown', handleClickFora);
   }, []);
 
+
+
   return (
     <div ref={containerRef} className="relative w-full">
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          if (!isOpen) {
+            // Calcula o índice do item selecionado no exato momento de abrir
+            const index = selected ? ativosFiltrados.findIndex((opt) => opt.id === selected.id) : 0;
+            setSelectedIndex(index >= 0 ? index : 0);
+          }
+          setIsOpen(!isOpen);
+        }}
         className={`flex items-center w-full h-10.5 px-3 gap-2
                     bg-gray-800/60 border rounded-xl
                     cursor-pointer transition-all text-sm
-                    ${
-                      isOpen
-                        ? 'border-violet-500/50 ring-2 ring-violet-500/40'
-                        : 'border-gray-700/50 hover:border-gray-600'
-                    }`}
+                    ${isOpen
+            ? 'border-violet-500/50 ring-2 ring-violet-500/40'
+            : 'border-gray-700/50 hover:border-gray-600'
+          }`}
       >
         <span className={selected ? 'text-white font-medium' : 'text-gray-500'}>
           {selected?.ticker ?? placeholder}
@@ -113,7 +116,11 @@ export function ComboboxAtivo({
               className="flex-1 bg-transparent text-sm text-white
                                 placeholder:text-gray-500 outline-none border-none"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value)
+                setSelectedIndex(0);
+              }
+              }
               onKeyDown={handleKeyDown}
               autoFocus
             />
@@ -128,11 +135,10 @@ export function ComboboxAtivo({
                   onClick={() => selectedOption(item)}
                   className={`flex items-center gap-2 w-full px-3 py-2
                                         text-sm transition-colors cursor-pointer
-                                        ${
-                                          selectedIndex === index
-                                            ? 'bg-violet-600/15 text-white'
-                                            : 'text-gray-300 hover:bg-gray-700/50'
-                                        }`}
+                                        ${selectedIndex === index
+                      ? 'bg-violet-600/15 text-white'
+                      : 'text-gray-300 hover:bg-gray-700/50'
+                    }`}
                 >
                   <span className="font-medium min-w-15 text-left">{item.ticker}</span>
                   {item.nome && <span className="text-gray-500 text-xs truncate">{item.nome}</span>}

@@ -39,6 +39,7 @@ def lerAtivos_usuario(usuario_id: str = Depends(obter_usuario_atual)):
 
 @router.get("/ativosAgrupados")
 def lerAtivosAgrupados_usuario(usuario_id: str = Depends(obter_usuario_atual)):
+    dados_formatados = []
     print(f"👉 Rota /ativosAgrupados acessada pelo usuário: {usuario_id}")
     with Session(engine) as session:
         query_transacoes = (
@@ -72,7 +73,6 @@ def lerAtivosAgrupados_usuario(usuario_id: str = Depends(obter_usuario_atual)):
                 }
             ativos_consolidados[ticker]["Quantidade"] += transacao.Quantidade
             ativos_consolidados[ticker]["custo_total"] += custo_da_transacao
-            dados_formatados = []
         for ticker, dados in ativos_consolidados.items():
             quantidade = dados["Quantidade"]
             preco_medio = (dados["custo_total"] / quantidade) if quantidade > 0 else 0

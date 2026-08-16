@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Ativo } from '~/types';
 import { ComboboxAtivo } from './ComboBoxAtivo';
 import InputCurrency, { moedas, type Moeda } from './InputCurrency';
@@ -31,8 +31,9 @@ export default function AddInvestimento({
   const [quantidade, setQuantidade] = useState(0);
   const [dataAquisicao, setDataAquisicao] = useState('');
   const [precoUnitario, setPrecoUnitario] = useState(0);
-  const [valorTotal, setValorTotal] = useState(0);
   const [moeda, setMoeda] = useState<Moeda>(moedas[0]);
+  const valorTotal = quantidade * precoUnitario;
+
 
   if (!data) {
     return <h1>Erro: O loader não retornou dados.</h1>;
@@ -50,7 +51,6 @@ export default function AddInvestimento({
     setQuantidade(0);
     setDataAquisicao('');
     setPrecoUnitario(0);
-    setValorTotal(0);
     setMoeda(moedas[0]);
   };
 
@@ -100,9 +100,6 @@ export default function AddInvestimento({
     fecharModal();
   };
 
-  useEffect(() => {
-    setValorTotal(quantidade * precoUnitario);
-  }, [quantidade, precoUnitario]);
 
   return (
     <div>
@@ -160,7 +157,10 @@ export default function AddInvestimento({
                     items={items}
                     placeholder="Buscar ativo..."
                     value={ativo}
-                    onChange={setAtivo}
+                    onChange={(novoAtivo) => {
+                      setAtivo(novoAtivo);
+                      setPrecoUnitario(novoAtivo.preco || 0);
+                    }}
                   />
                 </div>
 
@@ -230,7 +230,6 @@ export default function AddInvestimento({
                   <InputCurrency
                     valor={precoUnitario}
                     moeda={moeda}
-                    onValorChange={setPrecoUnitario}
                     onMoedaChange={setMoeda}
                   />
                 </div>
@@ -243,7 +242,6 @@ export default function AddInvestimento({
                 <InputCurrency
                   valor={valorTotal}
                   moeda={moeda}
-                  onValorChange={setValorTotal}
                   onMoedaChange={setMoeda}
                 />
               </div>

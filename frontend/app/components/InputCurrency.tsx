@@ -21,14 +21,12 @@ export function parsearValor(texto: string): number {
 interface InputCurrencyProps {
   valor: number;
   moeda: Moeda;
-  onValorChange: (valor: number) => void;
   onMoedaChange: (moeda: Moeda) => void;
 }
 
 export default function InputCurrency({
   valor,
   moeda,
-  onValorChange,
   onMoedaChange,
 }: InputCurrencyProps) {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -47,10 +45,6 @@ export default function InputCurrency({
   const selecionarMoeda = (m: Moeda) => {
     onMoedaChange(m);
     setMenuAberto(false);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onValorChange(parsearValor(e.target.value));
   };
 
   const { Bandeira } = moeda;
@@ -75,7 +69,6 @@ export default function InputCurrency({
                         placeholder:text-gray-600"
           placeholder="0,00"
           value={formatarMoeda(valor)}
-          onChange={handleChange}
           required
         />
         <button
@@ -109,11 +102,10 @@ export default function InputCurrency({
                 onClick={() => selecionarMoeda(m)}
                 className={`flex items-center gap-2 w-full px-3 py-2
                                     text-sm transition-colors cursor-pointer
-                                    ${
-                                      m.codigo === moeda.codigo
-                                        ? 'text-white bg-violet-600/15'
-                                        : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-                                    }`}
+                                    ${m.codigo === moeda.codigo
+                    ? 'text-white bg-violet-600/15'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                  }`}
               >
                 <m.Bandeira title={m.nome} className="h-3.5 w-5 rounded-sm object-cover" />
                 <span className="font-medium">{m.codigo}</span>
