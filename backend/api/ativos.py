@@ -29,5 +29,4 @@ def read_ativos():
                 "preco": preco if preco is not None else 0.0,
             })
             
-        print("💵 Ativos na carteira: ", ativos)
         return ativos

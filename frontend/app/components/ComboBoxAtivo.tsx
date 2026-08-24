@@ -77,7 +77,6 @@ export function ComboboxAtivo({
         type="button"
         onClick={() => {
           if (!isOpen) {
-            // Calcula o índice do item selecionado no exato momento de abrir
             const index = selected ? ativosFiltrados.findIndex((opt) => opt.id === selected.id) : 0;
             setSelectedIndex(index >= 0 ? index : 0);
           }

@@ -7,7 +7,9 @@ from models.cotacoes_diarias import cotacoes_diarias
 from models.historico_patrimonio import historico_patrimonio
 from core.security import obter_usuario_atual
 from datetime import datetime, timezone
+from uuid import UUID
 from dto.UsuarioDTO import NovoAporte
+from services.cotacoes_service import consolidar_patrimonio_retroativo
 
 router = APIRouter(prefix="/usuario", tags=["Usuarios"])
 
@@ -15,11 +17,12 @@ router = APIRouter(prefix="/usuario", tags=["Usuarios"])
 @router.get("/ativos")
 def lerAtivos_usuario(usuario_id: str = Depends(obter_usuario_atual)):
     print(f"👉 Rota /ativos acessada pelo usuário: {usuario_id}")
+    usuario_uuid = UUID(str(usuario_id))
     with Session(engine) as session:
         query = (
             select(transacoes, ativos_base)
             .join(ativos_base, col(transacoes.Ativo) == ativos_base.id)
-            .where(transacoes.Usuario == usuario_id)
+            .where(transacoes.Usuario == usuario_uuid)
         )
         resultados = session.exec(query).all()
 
@@ -41,11 +44,12 @@ def lerAtivos_usuario(usuario_id: str = Depends(obter_usuario_atual)):
 def lerAtivosAgrupados_usuario(usuario_id: str = Depends(obter_usuario_atual)):
     dados_formatados = []
     print(f"👉 Rota /ativosAgrupados acessada pelo usuário: {usuario_id}")
+    usuario_uuid = UUID(str(usuario_id))
     with Session(engine) as session:
         query_transacoes = (
             select(transacoes, ativos_base)
             .join(ativos_base, col(transacoes.Ativo) == ativos_base.id)
-            .where(transacoes.Usuario == usuario_id)
+            .where(transacoes.Usuario == usuario_uuid)
         )
         resultados = session.exec(query_transacoes).all()
 
@@ -91,11 +95,12 @@ def lerAtivosAgrupados_usuario(usuario_id: str = Depends(obter_usuario_atual)):
 @router.get("/obterHistorico")
 def obter_historico(usuario_id: str = Depends(obter_usuario_atual)):
     print(f"👉 Rota /obterHistorico ativada pelo usuário: {usuario_id}")
+    usuario_uuid = UUID(str(usuario_id))
     with Session(engine) as session:
             query = (
                 select(transacoes, ativos_base)
                 .join(ativos_base, col(transacoes.Ativo) == ativos_base.id)
-                .where(transacoes.Usuario == usuario_id)
+                .where(transacoes.Usuario == usuario_uuid)
             )
             resultados = session.exec(query).all()
             ativos_consolidados = {}
@@ -122,25 +127,59 @@ def aportar(
     dados_do_aporte: NovoAporte, usuario_id: str = Depends(obter_usuario_atual)
 ):
     print(f"👉 Rota /aportart_ativo acessada pelo usuário: {usuario_id}")
+    usuario_uuid = UUID(str(usuario_id))
     with Session(engine) as session:
+        # Garante que data_transacao seja um objeto date para o SQLite
+        if isinstance(dados_do_aporte.data_transacao, str):
+            data_transacao_obj = datetime.strptime(dados_do_aporte.data_transacao, "%Y-%m-%d").date()
+        else:
+            data_transacao_obj = dados_do_aporte.data_transacao
+
         novo_aporte = transacoes(
-            Usuario=usuario_id,
+            Usuario=usuario_uuid,
             Quantidade=dados_do_aporte.Quantidade,
             preco_unitario=dados_do_aporte.preco_unitario,
             tipo="Compra",
             Ativo=dados_do_aporte.Ativo,
-            data_transacao=dados_do_aporte.data_transacao,
+            data_transacao=data_transacao_obj,
         )
         session.add(novo_aporte)
         session.commit()
         session.refresh(novo_aporte)
-    return {"mensagem": "Aporte registrado com sucesso!", "id_transcao": novo_aporte.id}
+        consolidar_patrimonio_retroativo(usuario_id=usuario_uuid, data_inicio_recalculo=data_transacao_obj)
+
+        return {"mensagem": "Aporte registrado com sucesso!", "id_transcao": novo_aporte.id}
 
 @router.get("/historico_patrimonio")
-def get_historico_patrimonio(usuario_id: str):
+def get_historico_patrimonio(usuario_id: str = Depends(obter_usuario_atual)):
     print(f"👉 Rota /historico_patrimonio acessada pelo usuário: {usuario_id}")
+    usuario_uuid = UUID(str(usuario_id))
     with Session(engine) as session:
         query_encontrar_historico = (
             select(historico_patrimonio)
-            .where(transacoes.Usuario == usuario_id)
+            .where(historico_patrimonio.usuario_id == usuario_uuid)
+            .order_by(historico_patrimonio.data.asc())
         )
+        resultados = session.exec(query_encontrar_historico).all()
+        
+        # Se não há histórico ou se há registros duplicados legados no banco para o mesmo dia, recalcula do zero
+        datas_unicas = set(r.data for r in resultados)
+        if len(resultados) != len(datas_unicas) or len(resultados) == 0:
+            consolidar_patrimonio_retroativo(usuario_id=usuario_uuid)
+            resultados = session.exec(query_encontrar_historico).all()
+
+        mapa_por_data = {}
+        for reg in resultados:
+            mapa_por_data[reg.data] = reg
+            
+        registros_limpos = sorted(mapa_por_data.values(), key=lambda r: r.data)
+        
+        return [
+            {
+                "data": reg.data.strftime("%Y-%m-%d"),
+                "valor_aplicado": reg.valor_aplicado,
+                "valor_mercado": reg.valor_mercado,
+                "ganho_capital": reg.ganho_capital,
+            }
+            for reg in registros_limpos
+        ]

@@ -14,13 +14,13 @@ def rotina_teste_cotacoes():
     """Função que simula ou busca as cotações e grava o snapshot."""
     agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"⏰ [{agora}] Rodando atualização de cotações/patrimônio...")
-    # atualizar_cotacoes_e_patrimonio()
-    # consolidar_patrimonio_dia_atual()
+    atualizar_cotacoes_e_patrimonio()
+    consolidar_patrimonio_dia_atual()
     
 
 
 @asynccontextmanager
-async def lifespan(app: FastPI):
+async def lifespan(app: FastAPI):
     # scheduler.add_job(rotina_teste_cotacoes, 'cron', hour=19, minute=00)
     scheduler.add_job(rotina_teste_cotacoes, 'interval', minutes=1)
     scheduler.start()

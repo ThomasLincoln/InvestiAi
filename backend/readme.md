@@ -41,6 +41,11 @@ py -3 -m venv venv
 pip install fastapi uvicorn supabase python-dotenv sqlmodel apscheduler alembic psycopg2-binary apscheduler yfinance
 ```
 
+```powershell
+pip install pytest pytest-asyncio httpx
+```
+
+
 Lembrando que é importante criar o alembic.ini, caso necessário rodar o comando:
 
 ```powershell

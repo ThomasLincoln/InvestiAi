@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Ativo } from '~/types';
 import { ComboboxAtivo } from './ComboBoxAtivo';
 import InputCurrency, { moedas, type Moeda } from './InputCurrency';
-import { Plus, X, TrendingUp } from 'lucide-react';
+import { Plus, X, TrendingUp, Loader2 } from 'lucide-react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useLoaderData } from 'react-router';
 
@@ -32,6 +32,7 @@ export default function AddInvestimento({
   const [dataAquisicao, setDataAquisicao] = useState('');
   const [precoUnitario, setPrecoUnitario] = useState(0);
   const [moeda, setMoeda] = useState<Moeda>(moedas[0]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const valorTotal = quantidade * precoUnitario;
 
 
@@ -52,6 +53,7 @@ export default function AddInvestimento({
     setDataAquisicao('');
     setPrecoUnitario(0);
     setMoeda(moedas[0]);
+    setIsSubmitting(false);
   };
 
   const fecharModal = () => {
@@ -61,43 +63,62 @@ export default function AddInvestimento({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(ativo);
+    if (isSubmitting) return;
+
     if (!ativo || !ativo.id) {
       alert('Por favor, selecione um ativo válido.');
       return;
     }
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      alert('Você precisa estar logado!');
+    if (quantidade <= 0) {
+      alert('A quantidade deve ser maior que zero.');
       return;
     }
-    const novoAporte = {
-      Ativo: parseInt(ativo.id),
-      Quantidade: quantidade,
-      preco_unitario: precoUnitario,
-      data_transacao: dataAquisicao,
-    };
 
-    const response = await fetch(`${env.VITE_API_URL}/usuario/aportar_ativo`, {
-      method: 'POST',
-      headers: {
-        Authorization: session ? `Bearer ${session.access_token}` : '',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(novoAporte),
-    });
-    if (response.status != 200) {
-      console.error('Erro ao salvar:', response.statusText);
-      alert('Falha ao registrar aporte.');
-    } else {
-      alert('Aporte registrado com sucesso!');
-      onAporteSucesso();
-      fecharModal();
+    if (!dataAquisicao) {
+      alert('Por favor, selecione a data de aquisição.');
+      return;
     }
-    fecharModal();
+
+    try {
+      setIsSubmitting(true);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Você precisa estar logado!');
+        return;
+      }
+      const novoAporte = {
+        Ativo: parseInt(ativo.id),
+        Quantidade: quantidade,
+        preco_unitario: precoUnitario,
+        data_transacao: dataAquisicao,
+      };
+
+      const response = await fetch(`${env.VITE_API_URL}/usuario/aportar_ativo`, {
+        method: 'POST',
+        headers: {
+          Authorization: session ? `Bearer ${session.access_token}` : '',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(novoAporte),
+      });
+
+      if (response.status !== 200) {
+        console.error('Erro ao salvar:', response.statusText);
+        alert('Falha ao registrar aporte.');
+      } else {
+        alert('Aporte registrado com sucesso!');
+        onAporteSucesso();
+        fecharModal();
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+      alert('Ocorreu um erro ao registrar o aporte.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
 
@@ -230,6 +251,7 @@ export default function AddInvestimento({
                   <InputCurrency
                     valor={precoUnitario}
                     moeda={moeda}
+                    onValorChange={setPrecoUnitario}
                     onMoedaChange={setMoeda}
                   />
                 </div>
@@ -242,6 +264,7 @@ export default function AddInvestimento({
                 <InputCurrency
                   valor={valorTotal}
                   moeda={moeda}
+                  onValorChange={setPrecoUnitario}
                   onMoedaChange={setMoeda}
                 />
               </div>
@@ -259,13 +282,22 @@ export default function AddInvestimento({
                 </button>
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="flex-1 h-11 rounded-xl text-sm font-medium
-                                        text-white bg-violet-600
-                                        hover:bg-violet-500 active:bg-violet-700
-                                        transition-all shadow-lg shadow-violet-600/25
-                                        hover:shadow-violet-500/40"
+                            text-white bg-violet-600
+                            hover:bg-violet-500 active:bg-violet-700
+                            disabled:opacity-50 disabled:cursor-not-allowed
+                            transition-all shadow-lg shadow-violet-600/25
+                            hover:shadow-violet-500/40 flex items-center justify-center gap-2"
                 >
-                  Confirmar
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    'Confirmar'
+                  )}
                 </button>
               </div>
             </form>

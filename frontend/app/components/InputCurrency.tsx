@@ -21,12 +21,14 @@ export function parsearValor(texto: string): number {
 interface InputCurrencyProps {
   valor: number;
   moeda: Moeda;
+  onValorChange: (valor: number) => void;
   onMoedaChange: (moeda: Moeda) => void;
 }
 
 export default function InputCurrency({
   valor,
   moeda,
+  onValorChange,
   onMoedaChange,
 }: InputCurrencyProps) {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -45,6 +47,10 @@ export default function InputCurrency({
   const selecionarMoeda = (m: Moeda) => {
     onMoedaChange(m);
     setMenuAberto(false);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onValorChange(parsearValor(e.target.value));
   };
 
   const { Bandeira } = moeda;
@@ -69,6 +75,7 @@ export default function InputCurrency({
                         placeholder:text-gray-600"
           placeholder="0,00"
           value={formatarMoeda(valor)}
+          onChange={handleChange}
           required
         />
         <button

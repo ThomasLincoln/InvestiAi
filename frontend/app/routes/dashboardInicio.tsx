@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import PatrimonioTotal from '~/components/PatrimonioTotal';
 import AddInvestimento from '~/components/AddInvestimentoComponent';
-import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr';
+import { createServerClient, parseCookieHeader, serializeCookieHeader, createBrowserClient } from '@supabase/ssr';
 import { useOutletContext, useLoaderData, useRevalidator } from 'react-router';
 import { PieChart, ArrowUpRight } from 'lucide-react';
 import type { User, TransacaoBackend } from '~/types';
@@ -41,7 +41,7 @@ export async function loader({ request }: { request: Request }) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const [ativosRes, carteiraRes, historicoAtivos] = await Promise.all([
+  const [ativosRes, carteiraRes, historicoRes] = await Promise.all([
     fetch(`${env.VITE_API_URL}/ativos/`),
     fetch(`${env.VITE_API_URL}/usuario/ativosAgrupados`, {
       headers: {
@@ -49,7 +49,7 @@ export async function loader({ request }: { request: Request }) {
         'Content-Type': 'application/json',
       },
     }),
-    fetch(`${env.VITE_API_URL}/usuario/obterHistorico`, {
+    fetch(`${env.VITE_API_URL}/usuario/historico_patrimonio`, {
       headers: {
         Authorization: session ? `Bearer ${session.access_token}` : '',
         'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export async function loader({ request }: { request: Request }) {
 
   const ativos = await ativosRes.json();
   const ativosNaCarteira = await carteiraRes.json();
-  const historico = await historicoAtivos.json();
+  const historico = await historicoRes.json();
   let dadosTransformados: { id: number; ticker: string; nome: string; quantidade: number; preco_medio: number | undefined; preco: number | undefined; }[] = [];
   if (ativosNaCarteira && Array.isArray(ativosNaCarteira)) {
     dadosTransformados = ativosNaCarteira.map((item: TransacaoBackend) => {
@@ -85,33 +85,24 @@ export async function loader({ request }: { request: Request }) {
   } else {
     console.error("A resposta da API para carteira não é um array:", ativosNaCarteira);
   }
-  let saldoAcumulado = 0;
-  let chartData: { data: any; investido: number; }[] = [];
-  if (historico && Array.isArray(historico)) {
-    chartData = historico.map((item) => {
-      const totalGastoNoDia = item.transacoes.reduce((acc: number, transacao: any) => {
-        return acc + (transacao.quantidade * transacao.preco_unitario);
-      }, 0);
-
-      saldoAcumulado += totalGastoNoDia;
-
-      return {
-        data: item.data,
-        investido: saldoAcumulado,
-      };
-    });
-  } else {
-    console.error("A resposta da API para histórico não é um array:", historico);
+  let chartData: { data: string; investido: number; patrimonio: number; ganho: number }[] = [];
+  if (Array.isArray(historico)) {
+    chartData = historico.map((item) => ({
+      data: item.data,
+      investido: item.valor_aplicado,
+      patrimonio: item.valor_mercado,
+      ganho: item.ganho_capital,
+    }));
   }
   const loading = false;
 
-  return { env, ativos, carteira: dadosTransformados, supabase, loading, historico: chartData }
+  return { env, ativos, carteira: dadosTransformados, loading, historico: chartData }
 }
 
 export default function DashboardInicio() {
   const { user } = useOutletContext<{ user: User }>() || {};
   let loading = true;
-  const { ativos, carteira = [], supabase, newLoading, historico } = useLoaderData();
+  const { env, ativos, carteira = [], newLoading, historico } = useLoaderData();
   const revalidator = useRevalidator();
   const mudanca = {
     crescimento: true,
@@ -125,6 +116,10 @@ export default function DashboardInicio() {
   }, 0);
   const quantidadeAtivos = (carteira as unknown[]).length;
 
+  const supabase = createBrowserClient(
+    env.VITE_SUPABASE_URL,
+    env.VITE_SUPABASE_PUBLISHABLE_KEY
+  );
 
   return (
     <div>
