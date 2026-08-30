@@ -58,9 +58,9 @@ export async function loader({ request }: { request: Request }) {
   ])
 
 
-  const ativos = await ativosRes.json();
-  const ativosNaCarteira = await carteiraRes.json();
-  const historico = await historicoRes.json();
+  const ativos = ativosRes.ok ? await ativosRes.json() : [];
+  const ativosNaCarteira = carteiraRes.ok ? await carteiraRes.json() : [];
+  const historico = historicoRes.ok ? await historicoRes.json() : [];
   let dadosTransformados: { id: number; ticker: string; nome: string; quantidade: number; preco_medio: number | undefined; preco: number | undefined; }[] = [];
   if (ativosNaCarteira && Array.isArray(ativosNaCarteira)) {
     dadosTransformados = ativosNaCarteira.map((item: TransacaoBackend) => {
