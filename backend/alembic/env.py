@@ -1,5 +1,7 @@
 import sys
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
@@ -70,8 +72,12 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    configuration = config.get_section(config.config_ini_section,{})
+    if os.getenv("DATABASE_URL"):
+        db_url = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://")
+        configuration["sqlalchemy.url"] = db_url
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
