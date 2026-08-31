@@ -21,8 +21,8 @@ def rotina_teste_cotacoes():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # scheduler.add_job(rotina_teste_cotacoes, 'cron', hour=19, minute=00)
-    scheduler.add_job(rotina_teste_cotacoes, 'interval', minutes=1)
+    scheduler.add_job(rotina_teste_cotacoes, 'cron', hour=19, minute=0)
+    # scheduler.add_job(rotina_teste_cotacoes, 'interval', minutes=1)
     scheduler.start()
     yield
     scheduler.shutdown()    
