@@ -26,6 +26,7 @@ export interface TransacaoBackend {
   Ativo: {
     ticker: string;
     nome: string;
+    tipo?: string;
   };
 }
 

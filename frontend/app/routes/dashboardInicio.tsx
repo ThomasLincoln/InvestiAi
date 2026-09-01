@@ -4,8 +4,8 @@ import AddInvestimento from '~/components/AddInvestimentoComponent';
 import { createServerClient, parseCookieHeader, serializeCookieHeader, createBrowserClient } from '@supabase/ssr';
 import { useOutletContext, useLoaderData, useRevalidator } from 'react-router';
 import { useMemo, lazy, Suspense, useState } from 'react';
-import { PieChart, ArrowUpRight } from 'lucide-react';
-import type { User, TransacaoBackend } from '~/types';
+import { PieChart, ArrowUpRight, TrendingUp, Building2, Globe } from 'lucide-react';
+import type { User, TransacaoBackend, Ativo } from '~/types';
 import Ativos from '~/components/Ativos';
 import { motion } from 'framer-motion';
 
@@ -94,6 +94,7 @@ export async function loader({ request }: { request: Request }) {
         preco: precoAtual,
         variacao_reais: variacaoReais,
         variacao_percentual: Number(variacaoPercentual.toFixed(2)),
+        tipo: item.Ativo.tipo,
         saldo: saldoTotal,
       };
     });
@@ -157,6 +158,26 @@ export default function DashboardInicio() {
     env.VITE_SUPABASE_URL,
     env.VITE_SUPABASE_PUBLISHABLE_KEY
   ), [env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY]);
+
+  const acoes = useMemo(() => (carteira as Ativo[]).filter((ativo) => {
+    const t = ativo.tipo?.toLowerCase() || '';
+    return t === 'ação' || t === 'acao';
+  }), [carteira]);
+
+  const fiis = useMemo(() => (carteira as Ativo[]).filter((ativo) => {
+    const t = ativo.tipo?.toLowerCase() || '';
+    return t === 'fundo imobiliário' || t === 'fundo imobiliario' || t === 'fii';
+  }), [carteira]);
+
+  const stocks = useMemo(() => (carteira as Ativo[]).filter((ativo) => {
+    const t = ativo.tipo?.toLowerCase() || '';
+    return t === 'stock' || t === 'stocks';
+  }), [carteira]);
+
+  const etfs = useMemo(() => (carteira as Ativo[]).filter((ativo) => {
+    const t = ativo.tipo?.toLowerCase() || '';
+    return t === 'etf' || t === 'etfs';
+  }), [carteira]);
 
   const handleRecalcular = async () => {
     if (isRecalculating) return;
@@ -274,7 +295,7 @@ export default function DashboardInicio() {
 
         <motion.div variants={itemVariants}
           className="flex items-center gap-5 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
-                     hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all duration-300 ease-out"
+                    hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all duration-300 ease-out"
         >
           <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shrink-0 shadow-md shadow-emerald-500/30">
             <ArrowUpRight size={22} />
@@ -301,12 +322,39 @@ export default function DashboardInicio() {
         </Suspense>
       </motion.div>
 
-      {/* Table */}
-      <motion.div variants={itemVariants}
-        className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col items-center justify-center text-center transition-colors"
-      >
-        <Ativos items={carteira} loading={loading} />
-      </motion.div>
+      {/* Tabelas de Ativos Agrupadas por Categoria */}
+      <div className="space-y-6">
+        {acoes.length > 0 && (
+          <motion.div variants={itemVariants}>
+            <Ativos items={acoes} titulo="Ações" icon={<TrendingUp size={18} />} loading={loading} />
+          </motion.div>
+        )}
+
+        {fiis.length > 0 && (
+          <motion.div variants={itemVariants}>
+            <Ativos items={fiis} titulo="Fundos Imobiliários" icon={<Building2 size={18} />} loading={loading} />
+          </motion.div>
+        )}
+
+        {stocks.length > 0 && (
+          <motion.div variants={itemVariants}>
+            <Ativos items={stocks} titulo="Stocks" icon={<Globe size={18} />} loading={loading} />
+          </motion.div>
+        )}
+
+        {etfs.length > 0 && (
+          <motion.div variants={itemVariants}>
+            <Ativos items={etfs} titulo="ETFs" icon={<PieChart size={18} />} loading={loading} />
+          </motion.div>
+        )}
+
+        {/* Fallback se a carteira estiver totalmente vazia ou sem tipos */}
+        {carteira.length === 0 && (
+          <motion.div variants={itemVariants}>
+            <Ativos items={carteira} loading={loading} />
+          </motion.div>
+        )}
+      </div>
     </motion.div>
   );
 }

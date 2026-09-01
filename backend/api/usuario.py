@@ -69,7 +69,7 @@ def lerAtivosAgrupados_usuario(usuario_id: str = Depends(obter_usuario_atual)):
             custo_da_transacao = transacao.Quantidade * transacao.preco_unitario
             if ticker not in ativos_consolidados:
                 ativos_consolidados[ticker] = {
-                    "Ativo": {"ticker": ticker, "nome": ativo.nome},
+                    "Ativo": {"ticker": ticker, "nome": ativo.nome, "tipo": ativo.tipo},
                     "ID": ativo.id,
                     "Quantidade": 0,
                     "custo_total": 0.0,

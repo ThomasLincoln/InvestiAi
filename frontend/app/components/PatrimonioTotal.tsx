@@ -59,7 +59,7 @@ export default function PatrimonioTotal({ valorTotal, mudanca }: PatrimonioProps
       hover:shadow-lg hover:shadow-violet-500/10 hover:-translate-y-0.5
       transition-all duration-300 ease-out
     ">
-      <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shrink-0 shadow-md shadow-violet-500/30">
+      <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-linear-to-br from-violet-500 to-indigo-600 text-white shrink-0 shadow-md shadow-violet-500/30">
         <Wallet size={22} />
       </div>
       <div className="flex-1 min-w-0">
