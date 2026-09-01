@@ -9,7 +9,7 @@ from core.security import obter_usuario_atual
 from datetime import datetime, timezone
 from uuid import UUID
 from dto.UsuarioDTO import NovoAporte
-from services.cotacoes_service import consolidar_patrimonio_retroativo
+from services.cotacoes_service import consolidar_patrimonio_retroativo, atualizar_cotacoes_e_patrimonio
 
 router = APIRouter(prefix="/usuario", tags=["Usuarios"])
 
@@ -162,9 +162,9 @@ def get_historico_patrimonio(usuario_id: str = Depends(obter_usuario_atual)):
         )
         resultados = session.exec(query_encontrar_historico).all()
         
-        # Se não há histórico ou se há registros duplicados legados no banco para o mesmo dia, recalcula do zero
-        datas_unicas = set(r.data for r in resultados)
-        if len(resultados) != len(datas_unicas) or len(resultados) == 0:
+        # Só recalcula se não há nenhum histórico (primeira vez do usuário).
+        # Duplicatas são resolvidas pelo mapa abaixo — não precisa recalcular tudo.
+        if len(resultados) == 0:
             consolidar_patrimonio_retroativo(usuario_id=usuario_uuid)
             resultados = session.exec(query_encontrar_historico).all()
 
@@ -183,3 +183,23 @@ def get_historico_patrimonio(usuario_id: str = Depends(obter_usuario_atual)):
             }
             for reg in registros_limpos
         ]
+
+@router.post("/recalcular_patrimonio")
+def recalcular_patrimonio(usuario_id: str = Depends(obter_usuario_atual)):
+    """
+    Recalcula todo o histórico de patrimônio do usuário sob demanda.
+    Útil quando o servidor estava inativo e o job agendado não rodou.
+    """
+    print(f"🔄 Recálculo manual solicitado pelo usuário: {usuario_id}")
+    usuario_uuid = UUID(str(usuario_id))
+    try:
+        atualizar_cotacoes_e_patrimonio()
+        consolidar_patrimonio_retroativo(usuario_id=usuario_uuid)
+        return {"mensagem": "Patrimônio recalculado com sucesso!"}
+    except Exception as e:
+        print(f"❌ Erro ao recalcular patrimônio: {e}")
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=503,
+            detail=f"Erro ao buscar cotações (Yahoo Finance pode estar com limite de requisições). Tente novamente em alguns minutos. Detalhe: {str(e)}"
+        )

@@ -12,27 +12,20 @@ from services.yahoo_integration import get_actual_value_stock, buscar_e_salvar_c
 def atualizar_cotacoes_e_patrimonio():
     print("🔄 [Service] Processando cotações e obtendo valores atuais")
     with Session(engine) as session:
-        # 1. Buscar transações dos usuários
+        # 1. Buscar ativos associados às transações dos usuários
         query = (
             select(transacoes, ativos_base)
             .join(ativos_base, col(transacoes.Ativo) == ativos_base.id)
-            .distinct(ativos_base.ticker)
         )
         resultados = session.exec(query).all()
-        dados_formatados = []
-        for transacao, ativo in resultados:
-            dados_formatados.append(
-                {
-                    "id": ativo.id,
-                    "ticker": ativo.TickerConsulta
-                }
-            )
-        for ativo in dados_formatados:
-            valor_atual = get_actual_value_stock(ativo["ticker"])
+        mapa_ativos = {ativo.id: ativo.TickerConsulta for _, ativo in resultados}
+        
+        for ativo_id, ticker_consulta in mapa_ativos.items():
+            valor_atual = get_actual_value_stock(ticker_consulta)
             if valor_atual is not None:
                 cotacao_hoje = session.exec(
                     select(cotacoes_diarias).where(
-                        cotacoes_diarias.ativo_id == ativo["id"],
+                        cotacoes_diarias.ativo_id == ativo_id,
                         cotacoes_diarias.data == date.today()
                     )
                 ).first()
@@ -41,12 +34,12 @@ def atualizar_cotacoes_e_patrimonio():
                     session.add(cotacao_hoje)
                 else:
                     novo_historico = cotacoes_diarias(
-                        ativo_id=ativo["id"],
+                        ativo_id=ativo_id,
                         data=date.today(),
                         preco_fechamento=valor_atual
                     )
                     session.add(novo_historico)
-                print(f"Atualizado registro de valor {ativo['id']}: {valor_atual}")
+                print(f"Atualizado registro de valor {ativo_id} ({ticker_consulta}): {valor_atual}")
         session.commit()
     
 def consolidar_patrimonio_dia_atual():

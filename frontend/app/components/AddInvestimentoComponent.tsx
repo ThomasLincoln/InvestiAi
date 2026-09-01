@@ -5,6 +5,7 @@ import InputCurrency, { moedas, type Moeda } from './InputCurrency';
 import { Plus, X, TrendingUp, Loader2 } from 'lucide-react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useLoaderData } from 'react-router';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export async function loader() {
   return {
@@ -130,26 +131,54 @@ export default function AddInvestimento({
 
   return (
     <div>
+      {/* Botão com efeito shimmer */}
       <button
         onClick={() => setIsOpen(true)}
-        className="group flex items-center justify-center gap-2 px-5 py-2.5 w-full sm:w-auto
+        className="relative group overflow-hidden flex items-center justify-center gap-2 px-5 py-2.5 w-full sm:w-auto
                     text-white bg-violet-600 rounded-xl
                     hover:bg-violet-500 active:bg-violet-700
                     transition-all shadow-lg shadow-violet-600/25
                     hover:shadow-violet-500/40 hover:scale-[1.02]
                     text-sm font-medium"
       >
+        {/* Shimmer sweep */}
+        <span
+          className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full
+                      bg-gradient-to-r from-transparent via-white/20 to-transparent
+                      transition-transform duration-700 ease-in-out"
+        />
         <Plus size={18} strokeWidth={2.5} />
         Novo Lançamento
       </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div
-            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl
-                            bg-gray-900 border border-gray-800
-                            shadow-2xl shadow-black/50"
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           >
+            {/* Backdrop */}
+            <motion.div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={fecharModal}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+
+            {/* Modal Panel */}
+            <motion.div
+              className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl
+                          bg-gray-900 border border-gray-800
+                          shadow-2xl shadow-black/50"
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+            >
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800">
               <div className="flex items-center gap-3">
                 <div
@@ -250,7 +279,7 @@ export default function AddInvestimento({
                       value={quantidade}
                       className="flex-1 h-full bg-transparent text-center
                                                 text-white text-sm font-medium
-                                                outline-none border-none w-3/5"
+                                                outline-none border-none w-3/5 tabular-nums"
                     />
                     <button
                       type="button"
@@ -343,9 +372,11 @@ export default function AddInvestimento({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
