@@ -9,6 +9,7 @@ export interface Ativo {
   id?: string;
   ticker: string;
   nome: string;
+  tipo?: string;
   quantidade?: number;
   preco?: number;
   preco_medio?: number;

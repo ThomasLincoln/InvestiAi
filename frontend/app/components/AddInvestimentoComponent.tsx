@@ -33,7 +33,13 @@ export default function AddInvestimento({
   const [precoUnitario, setPrecoUnitario] = useState(0);
   const [moeda, setMoeda] = useState<Moeda>(moedas[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tipoFiltro, setTipoFiltro] = useState<string>('Todos');
+
   const valorTotal = quantidade * precoUnitario;
+
+  const safeItems = Array.isArray(items) ? items : [];
+  const tiposUnicos = Array.from(new Set(safeItems.map(i => i.tipo).filter(Boolean))) as string[];
+  const ativosFiltrados = tipoFiltro === 'Todos' ? safeItems : safeItems.filter(i => i.tipo === tipoFiltro);
 
 
   if (!data) {
@@ -169,13 +175,49 @@ export default function AddInvestimento({
             </div>
 
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
+              
+              {tiposUnicos.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Tipo de Investimento
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTipoFiltro('Todos')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        tipoFiltro === 'Todos'
+                          ? 'bg-violet-600 text-white'
+                          : 'bg-gray-800/60 text-gray-400 hover:text-white hover:bg-gray-700/50'
+                      }`}
+                    >
+                      Todos
+                    </button>
+                    {tiposUnicos.map((tipo) => (
+                      <button
+                        key={tipo}
+                        type="button"
+                        onClick={() => setTipoFiltro(tipo)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          tipoFiltro === tipo
+                            ? 'bg-violet-600 text-white'
+                            : 'bg-gray-800/60 text-gray-400 hover:text-white hover:bg-gray-700/50'
+                        }`}
+                      >
+                        {tipo}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Ativo
                   </label>
                   <ComboboxAtivo
-                    items={items}
+                    items={ativosFiltrados}
                     placeholder="Buscar ativo..."
                     value={ativo}
                     onChange={(novoAtivo) => {

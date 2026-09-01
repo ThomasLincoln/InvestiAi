@@ -41,21 +41,30 @@ export async function loader({ request }: { request: Request }) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const [ativosRes, carteiraRes, historicoRes] = await Promise.all([
-    fetch(`${env.VITE_API_URL}/ativos/`),
-    fetch(`${env.VITE_API_URL}/usuario/ativosAgrupados`, {
-      headers: {
-        Authorization: session ? `Bearer ${session.access_token}` : '',
-        'Content-Type': 'application/json',
-      },
-    }),
-    fetch(`${env.VITE_API_URL}/usuario/historico_patrimonio`, {
-      headers: {
-        Authorization: session ? `Bearer ${session.access_token}` : '',
-        'Content-Type': 'application/json',
-      },
-    })
-  ])
+  let ativosRes, carteiraRes, historicoRes;
+  try {
+    [ativosRes, carteiraRes, historicoRes] = await Promise.all([
+      fetch(`${env.VITE_API_URL}/ativos/`),
+      fetch(`${env.VITE_API_URL}/usuario/ativosAgrupados`, {
+        headers: {
+          Authorization: session ? `Bearer ${session.access_token}` : '',
+          'Content-Type': 'application/json',
+        },
+      }),
+      fetch(`${env.VITE_API_URL}/usuario/historico_patrimonio`, {
+        headers: {
+          Authorization: session ? `Bearer ${session.access_token}` : '',
+          'Content-Type': 'application/json',
+        },
+      })
+    ]);
+  } catch (error) {
+    console.error("Falha ao se conectar com a API do Backend:", error);
+    ativosRes = { ok: false };
+    carteiraRes = { ok: false };
+    historicoRes = { ok: false };
+  }
+
 
 
   const ativos = ativosRes.ok ? await ativosRes.json() : [];

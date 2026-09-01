@@ -26,6 +26,7 @@ def read_ativos():
                 "id": str(ativo.id),
                 "ticker": ativo.ticker,
                 "nome": ativo.nome,
+                "tipo": ativo.tipo,
                 "preco": preco if preco is not None else 0.0,
             })
             

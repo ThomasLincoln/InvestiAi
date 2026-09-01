@@ -9,3 +9,4 @@ class ativos_base(SQLModel, table=True):
     ticker: str
     nome: str
     TickerConsulta: str
+    tipo: str
