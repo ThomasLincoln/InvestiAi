@@ -6,6 +6,6 @@ export default [
     index('routes/dashboardInicio.tsx'),
     route('settings', 'routes/settings.tsx'),
     // route('wallet', 'routes/wallet.tsx'),
-    route('test', 'routes/testes.tsx'),
+    route('transacoes', 'routes/transacoes.tsx'),
   ]),
 ] satisfies RouteConfig;

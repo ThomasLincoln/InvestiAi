@@ -140,6 +140,11 @@ export function ComboboxAtivo({
                     }`}
                 >
                   <span className="font-medium min-w-15 text-left">{item.ticker}</span>
+                  {item.quantidade !== undefined && item.quantidade > 0 && (
+                    <span className="text-[11px] px-1.5 py-0.5 rounded bg-gray-700/80 text-gray-300 shrink-0 font-medium">
+                      {item.quantidade} cota{item.quantidade > 1 ? 's' : ''}
+                    </span>
+                  )}
                   {item.nome && <span className="text-gray-500 text-xs truncate">{item.nome}</span>}
                   {selected?.id === item.id && (
                     <Check size={14} className="text-violet-400 ml-auto shrink-0" />

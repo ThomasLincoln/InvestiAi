@@ -2,19 +2,6 @@ import type { Ativo } from '~/types';
 import { TrendingUp, TrendingDown, Minus, ChevronsUpDown, ChevronsDownUp } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
-const TIPO_BADGE: Record<string, { label: string; className: string }> = {
-  'FII': { label: 'FII', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  'Fundo Imobiliário': { label: 'FII', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  'fundo imobiliário': { label: 'FII', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  'Stock': { label: 'Stock', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  'stock': { label: 'Stock', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  'Ação': { label: 'Ação', className: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' },
-  'Acao': { label: 'Ação', className: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' },
-  'acao': { label: 'Ação', className: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' },
-  'ETF': { label: 'ETF', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  'etf': { label: 'ETF', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-};
-
 const CATEGORIAS = [
   { id: 'Todos', label: 'Todos' },
   { id: 'Ação', label: 'Ações' },
@@ -27,10 +14,27 @@ type CategoriaId = typeof CATEGORIAS[number]['id'];
 
 function TipoBadge({ tipo }: { tipo?: string }) {
   if (!tipo) return null;
-  const config = TIPO_BADGE[tipo] ?? { label: tipo, className: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' };
+  const s = tipo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  let label = tipo;
+  let className = 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
+
+  if (s.includes('fii') || s.includes('fundo') || s.includes('imobili')) {
+    label = 'FII';
+    className = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+  } else if (s.includes('stock')) {
+    label = 'Stock';
+    className = 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+  } else if (s.includes('acao')) {
+    label = 'Ação';
+    className = 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400';
+  } else if (s.includes('etf')) {
+    label = 'ETF';
+    className = 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+  }
+
   return (
-    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${config.className}`}>
-      {config.label}
+    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${className}`}>
+      {label}
     </span>
   );
 }
@@ -124,15 +128,15 @@ export default function Ativos({
                   if (!visible) setVisible(true);
                 }}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${isActive
-                    ? 'bg-violet-600 text-white shadow-sm shadow-violet-500/20'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/60 border border-gray-200/80 dark:border-gray-700'
+                  ? 'bg-violet-600 text-white shadow-sm shadow-violet-500/20'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/60 border border-gray-200/80 dark:border-gray-700'
                   }`}
               >
                 <span>{cat.label}</span>
                 <span
                   className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isActive
-                      ? 'bg-white/20 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                     }`}
                 >
                   {count}
@@ -273,10 +277,10 @@ export default function Ativos({
                         <td className="hidden md:table-cell px-5 py-4 text-right">
                           <span
                             className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg ${isPositiva
-                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                : isNegativa
-                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                  : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                              : isNegativa
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                               }`}
                           >
                             {isPositiva && <TrendingUp size={12} />}

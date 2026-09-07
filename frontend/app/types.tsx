@@ -35,3 +35,18 @@ export interface HistoricoAtivo {
   preco_unitario: number;
   tipo: string;
 }
+
+export interface Movimentacao {
+  id: number;
+  data: string;
+  tipo: string;
+  quantidade: number;
+  preco_unitario: number;
+  valor_total: number;
+  ativo: {
+    id: number;
+    ticker: string;
+    nome: string;
+    tipo?: string;
+  };
+}

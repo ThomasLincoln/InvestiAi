@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, col
 from core.database import engine
 from models.transacoes import transacoes
@@ -50,6 +50,7 @@ def lerAtivosAgrupados_usuario(usuario_id: str = Depends(obter_usuario_atual)):
             select(transacoes, ativos_base)
             .join(ativos_base, col(transacoes.Ativo) == ativos_base.id)
             .where(transacoes.Usuario == usuario_uuid)
+            .order_by(transacoes.data_transacao.asc(), transacoes.id.asc())
         )
         resultados = session.exec(query_transacoes).all()
 
@@ -66,7 +67,6 @@ def lerAtivosAgrupados_usuario(usuario_id: str = Depends(obter_usuario_atual)):
         ativos_consolidados = {}
         for transacao, ativo in resultados:
             ticker = ativo.ticker
-            custo_da_transacao = transacao.Quantidade * transacao.preco_unitario
             if ticker not in ativos_consolidados:
                 ativos_consolidados[ticker] = {
                     "Ativo": {"ticker": ticker, "nome": ativo.nome, "tipo": ativo.tipo},
@@ -75,21 +75,33 @@ def lerAtivosAgrupados_usuario(usuario_id: str = Depends(obter_usuario_atual)):
                     "custo_total": 0.0,
                     "preco": mapa_precos.get(ativo.id, 0.0)
                 }
-            ativos_consolidados[ticker]["Quantidade"] += transacao.Quantidade
-            ativos_consolidados[ticker]["custo_total"] += custo_da_transacao
+            
+            is_venda = (transacao.tipo or "").lower() == "venda"
+            if is_venda:
+                qtd_atual = ativos_consolidados[ticker]["Quantidade"]
+                if qtd_atual > 0:
+                    pm = ativos_consolidados[ticker]["custo_total"] / qtd_atual
+                    nova_qtd = max(0, qtd_atual - transacao.Quantidade)
+                    ativos_consolidados[ticker]["Quantidade"] = nova_qtd
+                    ativos_consolidados[ticker]["custo_total"] = max(0.0, nova_qtd * pm)
+            else:
+                custo_da_transacao = transacao.Quantidade * transacao.preco_unitario
+                ativos_consolidados[ticker]["Quantidade"] += transacao.Quantidade
+                ativos_consolidados[ticker]["custo_total"] += custo_da_transacao
+
         for ticker, dados in ativos_consolidados.items():
             quantidade = dados["Quantidade"]
-            preco_medio = (dados["custo_total"] / quantidade) if quantidade > 0 else 0
-            dados_formatados.append(
-                {
-                    "ID": dados["ID"],
-                    "Ativo": dados["Ativo"],
-                    "Quantidade": dados["Quantidade"],
-                    "preco_medio": round(preco_medio, 2),
-                    "preco": dados["preco"]
-                }
-            )
-        print(dados_formatados)
+            if quantidade > 0:
+                preco_medio = (dados["custo_total"] / quantidade) if quantidade > 0 else 0
+                dados_formatados.append(
+                    {
+                        "ID": dados["ID"],
+                        "Ativo": dados["Ativo"],
+                        "Quantidade": dados["Quantidade"],
+                        "preco_medio": round(preco_medio, 2),
+                        "preco": dados["preco"]
+                    }
+                )
         return dados_formatados
 
 @router.get("/obterHistorico")
@@ -122,6 +134,65 @@ def obter_historico(usuario_id: str = Depends(obter_usuario_atual)):
         
             return historico_lista
 
+
+@router.get("/transacoes")
+def listar_transacoes_usuario(usuario_id: str = Depends(obter_usuario_atual)):
+    print(f"👉 Rota /usuario/transacoes acessada pelo usuário: {usuario_id}")
+    usuario_uuid = UUID(str(usuario_id))
+    with Session(engine) as session:
+        query = (
+            select(transacoes, ativos_base)
+            .join(ativos_base, col(transacoes.Ativo) == ativos_base.id)
+            .where(transacoes.Usuario == usuario_uuid)
+            .order_by(col(transacoes.data_transacao).desc(), col(transacoes.id).desc())
+        )
+        resultados = session.exec(query).all()
+
+        lista = []
+        for transacao, ativo in resultados:
+            valor_total = round(transacao.Quantidade * transacao.preco_unitario, 2)
+            lista.append({
+                "id": transacao.id,
+                "data": str(transacao.data_transacao),
+                "tipo": transacao.tipo or "Compra",
+                "quantidade": transacao.Quantidade,
+                "preco_unitario": transacao.preco_unitario,
+                "valor_total": valor_total,
+                "ativo": {
+                    "id": ativo.id,
+                    "ticker": ativo.ticker,
+                    "nome": ativo.nome,
+                    "tipo": ativo.tipo
+                }
+            })
+        return lista
+
+
+@router.delete("/transacoes/{transacao_id}")
+def excluir_transacao(transacao_id: int, usuario_id: str = Depends(obter_usuario_atual)):
+    print(f"👉 Exclusão de transação {transacao_id} solicitada pelo usuário: {usuario_id}")
+    usuario_uuid = UUID(str(usuario_id))
+    with Session(engine) as session:
+        transacao = session.get(transacoes, transacao_id)
+        if not transacao:
+            raise HTTPException(status_code=404, detail="Transação não encontrada.")
+
+        if transacao.Usuario != usuario_uuid:
+            raise HTTPException(status_code=403, detail="Você não tem permissão para excluir esta transação.")
+
+        data_inicio = transacao.data_transacao
+        session.delete(transacao)
+        session.commit()
+
+        # Recalcula histórico patrimonial retroativamente a partir da data da transação excluída
+        try:
+            consolidar_patrimonio_retroativo(usuario_id=usuario_uuid, data_inicio_recalculo=data_inicio)
+        except Exception as e:
+            print(f"Aviso: Erro ao consolidar patrimônio após exclusão: {e}")
+
+        return {"mensagem": "Transação excluída com sucesso!", "id": transacao_id}
+
+
 @router.post("/aportar_ativo")
 def aportar(
     dados_do_aporte: NovoAporte, usuario_id: str = Depends(obter_usuario_atual)
@@ -135,20 +206,24 @@ def aportar(
         else:
             data_transacao_obj = dados_do_aporte.data_transacao
 
+        tipo_transacao = "Venda" if (dados_do_aporte.tipo or "").lower() == "venda" else "Compra"
+
         novo_aporte = transacoes(
             Usuario=usuario_uuid,
             Quantidade=dados_do_aporte.Quantidade,
             preco_unitario=dados_do_aporte.preco_unitario,
-            tipo="Compra",
+            tipo=tipo_transacao,
             Ativo=dados_do_aporte.Ativo,
             data_transacao=data_transacao_obj,
         )
         session.add(novo_aporte)
         session.commit()
         session.refresh(novo_aporte)
-        consolidar_patrimonio_retroativo(usuario_id=usuario_uuid, data_inicio_recalculo=data_transacao_obj)
+        # Comentado para agilizar o cadastro em lote de múltiplos aportes:
+        # consolidar_patrimonio_retroativo(usuario_id=usuario_uuid, data_inicio_recalculo=data_transacao_obj)
 
-        return {"mensagem": "Aporte registrado com sucesso!", "id_transcao": novo_aporte.id}
+        msg = "Venda registrada com sucesso!" if tipo_transacao == "Venda" else "Aporte registrado com sucesso!"
+        return {"mensagem": msg, "id_transcao": novo_aporte.id}
 
 @router.get("/historico_patrimonio")
 def get_historico_patrimonio(usuario_id: str = Depends(obter_usuario_atual)):
@@ -202,4 +277,8 @@ def recalcular_patrimonio(usuario_id: str = Depends(obter_usuario_atual)):
         raise HTTPException(
             status_code=503,
             detail=f"Erro ao buscar cotações (Yahoo Finance pode estar com limite de requisições). Tente novamente em alguns minutos. Detalhe: {str(e)}"
-        )
+        )
+
+@router.delete("/deletarTransacao")
+def deletar_transacao():
+    return {"mensagem": "Registro deletado"}

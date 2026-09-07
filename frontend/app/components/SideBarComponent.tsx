@@ -15,9 +15,8 @@ export default function SideBarComponent({
 
   const navItems = [
     { name: 'Início', path: '/dashboard', icon: 'home' },
-    // { name: 'Meus Ativos', path: '/dashboard/wallet', icon: 'trending_up' },
+    { name: 'Transações', path: '/dashboard/transacoes', icon: 'receipt_long' },
     { name: 'Configurações', path: '/dashboard/settings', icon: 'settings' },
-    { name: 'Testes', path: '/dashboard/test', icon: 'science' }, // <- Nova rota adicionada
   ];
 
   function isActive(path: string) {

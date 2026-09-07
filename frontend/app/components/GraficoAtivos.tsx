@@ -8,17 +8,6 @@ type Periodo = "1M" | "3M" | "6M" | "1Y" | "ALL";
 export default function GraficoAtivos({ historico }: { historico: any[] }) {
   const [periodo, setPeriodo] = useState<Periodo>("ALL");
 
-  const chartConfig = {
-    patrimonio: {
-      label: "Patrimônio Total",
-      color: "#10b981",
-    },
-    investido: {
-      label: "Total Investido",
-      color: "#6b7280",
-    },
-  } satisfies ChartConfig;
-
   // Filtragem dos dados de acordo com o período selecionado
   const dadosFiltrados = useMemo(() => {
     if (!historico || historico.length === 0) return [];
@@ -54,6 +43,27 @@ export default function GraficoAtivos({ historico }: { historico: any[] }) {
     );
   }
 
+  // Ponto mais recente para verificação de rentabilidade
+  const ultimoPonto = dadosFiltrados[dadosFiltrados.length - 1];
+  const estaDesvalorizado = ultimoPonto ? ultimoPonto.patrimonio < ultimoPonto.investido : false;
+
+  const lucroPrejuizo = ultimoPonto ? ultimoPonto.patrimonio - ultimoPonto.investido : 0;
+  const lucroPrejuizoPct =
+    ultimoPonto && ultimoPonto.investido > 0 ? (lucroPrejuizo / ultimoPonto.investido) * 100 : 0;
+
+  const corPrincipal = estaDesvalorizado ? "#ef4444" : "#10b981";
+
+  const chartConfig = {
+    patrimonio: {
+      label: "Patrimônio Total",
+      color: corPrincipal,
+    },
+    investido: {
+      label: "Total Investido",
+      color: "#6b7280",
+    },
+  } satisfies ChartConfig;
+
   const botoesPeriodo: { key: Periodo; label: string }[] = [
     { key: "1M", label: "1M" },
     { key: "3M", label: "3M" },
@@ -66,10 +76,27 @@ export default function GraficoAtivos({ historico }: { historico: any[] }) {
     <div className="w-full">
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Evolução Patrimonial
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2.5">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Evolução Patrimonial
+            </h3>
+            {ultimoPonto && (
+              <span
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${estaDesvalorizado
+                    ? "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400"
+                    : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  }`}
+              >
+                {estaDesvalorizado ? "▼ " : "▲ +"}
+                {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
+                  lucroPrejuizo
+                )}{" "}
+                ({lucroPrejuizoPct >= 0 ? "+" : ""}
+                {lucroPrejuizoPct.toFixed(2)}%)
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             Comparativo entre o total investido e o valor de mercado atual da sua carteira
           </p>
         </div>
@@ -81,8 +108,8 @@ export default function GraficoAtivos({ historico }: { historico: any[] }) {
               key={btn.key}
               onClick={() => setPeriodo(btn.key)}
               className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${periodo === btn.key
-                ? "bg-white dark:bg-gray-700 text-violet-600 dark:text-violet-400 shadow-sm"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  ? "bg-white dark:bg-gray-700 text-violet-600 dark:text-violet-400 shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
             >
               {btn.label}
@@ -99,8 +126,8 @@ export default function GraficoAtivos({ historico }: { historico: any[] }) {
         >
           <defs>
             <linearGradient id="colorPatrimonio" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+              <stop offset="5%" stopColor={corPrincipal} stopOpacity={0.35} />
+              <stop offset="95%" stopColor={corPrincipal} stopOpacity={0.0} />
             </linearGradient>
             <linearGradient id="colorInvestido" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#6b7280" stopOpacity={0.15} />
@@ -185,7 +212,7 @@ export default function GraficoAtivos({ historico }: { historico: any[] }) {
           <Area
             dataKey="patrimonio"
             type="monotone"
-            stroke="#10b981"
+            stroke={corPrincipal}
             fill="url(#colorPatrimonio)"
             strokeWidth={2.5}
           />

@@ -31,3 +31,4 @@ def read_ativos():
             })
             
         return ativos
+    

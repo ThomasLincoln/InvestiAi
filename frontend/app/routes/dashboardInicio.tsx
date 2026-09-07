@@ -3,14 +3,12 @@ import PatrimonioTotal from '~/components/PatrimonioTotal';
 import AddInvestimento from '~/components/AddInvestimentoComponent';
 import { createServerClient, parseCookieHeader, serializeCookieHeader, createBrowserClient } from '@supabase/ssr';
 import { useOutletContext, useLoaderData, useRevalidator } from 'react-router';
-import { useMemo, lazy, Suspense, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { PieChart, ArrowUpRight, TrendingUp, Building2, Globe } from 'lucide-react';
 import type { User, TransacaoBackend, Ativo } from '~/types';
 import Ativos from '~/components/Ativos';
+import GraficoAtivos from '~/components/GraficoAtivos';
 import { motion } from 'framer-motion';
-
-// Carregamento lazy do gráfico (recharts é pesado, ~200KB)
-const GraficoAtivos = lazy(() => import('~/components/GraficoAtivos'));
 
 export async function loader({ request }: { request: Request }) {
   const env = {
@@ -123,6 +121,11 @@ export default function DashboardInicio() {
   const loading = newLoading ?? false;
   const primeiroNome = user?.fullname?.split(' ')[0] ?? 'Investidor';
 
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [recalcMsg, setRecalcMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null);
 
@@ -159,25 +162,31 @@ export default function DashboardInicio() {
     env.VITE_SUPABASE_PUBLISHABLE_KEY
   ), [env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY]);
 
-  const acoes = useMemo(() => (carteira as Ativo[]).filter((ativo) => {
-    const t = ativo.tipo?.toLowerCase() || '';
-    return t === 'ação' || t === 'acao';
-  }), [carteira]);
+  const isFII = (tipo?: string) => {
+    if (!tipo) return false;
+    const s = tipo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return s.includes("fii") || s.includes("fundo") || s.includes("imobili");
+  };
 
-  const fiis = useMemo(() => (carteira as Ativo[]).filter((ativo) => {
-    const t = ativo.tipo?.toLowerCase() || '';
-    return t === 'fundo imobiliário' || t === 'fundo imobiliario' || t === 'fii';
-  }), [carteira]);
+  const isStock = (tipo?: string) => {
+    if (!tipo) return false;
+    const s = tipo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return s.includes("stock") || s.includes("acao");
+  };
 
-  const stocks = useMemo(() => (carteira as Ativo[]).filter((ativo) => {
-    const t = ativo.tipo?.toLowerCase() || '';
-    return t === 'stock' || t === 'stocks';
-  }), [carteira]);
+  const isETF = (tipo?: string) => {
+    if (!tipo) return false;
+    const s = tipo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return s.includes("etf");
+  };
 
-  const etfs = useMemo(() => (carteira as Ativo[]).filter((ativo) => {
-    const t = ativo.tipo?.toLowerCase() || '';
-    return t === 'etf' || t === 'etfs';
-  }), [carteira]);
+  const stocks = useMemo(() => (carteira as Ativo[]).filter((ativo) => isStock(ativo.tipo)), [carteira]);
+  const fiis = useMemo(() => (carteira as Ativo[]).filter((ativo) => isFII(ativo.tipo)), [carteira]);
+  const etfs = useMemo(() => (carteira as Ativo[]).filter((ativo) => isETF(ativo.tipo)), [carteira]);
+  const outros = useMemo(
+    () => (carteira as Ativo[]).filter((ativo) => !isStock(ativo.tipo) && !isFII(ativo.tipo) && !isETF(ativo.tipo)),
+    [carteira]
+  );
 
   const handleRecalcular = async () => {
     if (isRecalculating) return;
@@ -267,7 +276,12 @@ export default function DashboardInicio() {
                 {isRecalculating ? 'Atualizando...' : 'Atualizar cotações'}
               </span>
             </button>
-            <AddInvestimento items={ativos} supabase={supabase} onAporteSucesso={() => revalidator.revalidate()} />
+            <AddInvestimento
+              items={ativos}
+              carteira={carteira}
+              supabase={supabase}
+              onAporteSucesso={() => revalidator.revalidate()}
+            />
           </div>
         </div>
       </motion.div>
@@ -313,20 +327,20 @@ export default function DashboardInicio() {
       <motion.div variants={itemVariants}
         className="mb-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 p-10 flex flex-col items-center justify-center text-center transition-colors"
       >
-        <Suspense fallback={
+        {isMounted ? (
+          <GraficoAtivos historico={historico} />
+        ) : (
           <div className="flex h-64 w-full items-center justify-center">
             <div className="h-full w-full rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
           </div>
-        }>
-          <GraficoAtivos historico={historico} />
-        </Suspense>
+        )}
       </motion.div>
 
       {/* Tabelas de Ativos Agrupadas por Categoria */}
       <div className="space-y-6">
-        {acoes.length > 0 && (
+        {stocks.length > 0 && (
           <motion.div variants={itemVariants}>
-            <Ativos items={acoes} titulo="Ações" icon={<TrendingUp size={18} />} loading={loading} />
+            <Ativos items={stocks} titulo="Ações" icon={<TrendingUp size={18} />} loading={loading} />
           </motion.div>
         )}
 
@@ -336,19 +350,18 @@ export default function DashboardInicio() {
           </motion.div>
         )}
 
-        {stocks.length > 0 && (
-          <motion.div variants={itemVariants}>
-            <Ativos items={stocks} titulo="Stocks" icon={<Globe size={18} />} loading={loading} />
-          </motion.div>
-        )}
-
         {etfs.length > 0 && (
           <motion.div variants={itemVariants}>
             <Ativos items={etfs} titulo="ETFs" icon={<PieChart size={18} />} loading={loading} />
           </motion.div>
         )}
 
-        {/* Fallback se a carteira estiver totalmente vazia ou sem tipos */}
+        {outros.length > 0 && (
+          <motion.div variants={itemVariants}>
+            <Ativos items={outros} titulo="Outros Ativos" icon={<Globe size={18} />} loading={loading} />
+          </motion.div>
+        )}
+
         {carteira.length === 0 && (
           <motion.div variants={itemVariants}>
             <Ativos items={carteira} loading={loading} />

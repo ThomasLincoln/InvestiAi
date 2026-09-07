@@ -65,11 +65,16 @@ def consolidar_patrimonio_retroativo(usuario_id: str | UUID, data_inicio_recalcu
             return
         
         primeira_data = todas_transacoes[0][0].data_transacao
+        if primeira_data.year < 2000:
+            primeira_data = date(2020, 1, 1)
+
         if data_inicio_recalculo is None:
             data_inicio = primeira_data
         else:
             if isinstance(data_inicio_recalculo, str):
                 data_inicio_recalculo = datetime.strptime(data_inicio_recalculo, "%Y-%m-%d").date()
+            if data_inicio_recalculo.year < 2000:
+                data_inicio_recalculo = date(2020, 1, 1)
             data_inicio = min(data_inicio_recalculo, primeira_data)
         
         # 2. Garantir que as cotações históricas existam no banco para todos os ativos
@@ -131,8 +136,18 @@ def consolidar_patrimonio_retroativo(usuario_id: str | UUID, data_inicio_recalcu
             for t, a in transacoes_ate_o_dia:
                 if a.id not in carteira_no_dia:
                     carteira_no_dia[a.id] = {"qtd": 0, "pago": 0.0, "preco_compra": t.preco_unitario}
-                carteira_no_dia[a.id]["qtd"] += t.Quantidade
-                carteira_no_dia[a.id]["pago"] += (t.Quantidade * t.preco_unitario)
+                
+                is_venda = (t.tipo or "").lower() == "venda"
+                if is_venda:
+                    qtd_antiga = carteira_no_dia[a.id]["qtd"]
+                    if qtd_antiga > 0:
+                        pm = carteira_no_dia[a.id]["pago"] / qtd_antiga
+                        nova_qtd = max(0, qtd_antiga - t.Quantidade)
+                        carteira_no_dia[a.id]["qtd"] = nova_qtd
+                        carteira_no_dia[a.id]["pago"] = round(nova_qtd * pm, 2)
+                else:
+                    carteira_no_dia[a.id]["qtd"] += t.Quantidade
+                    carteira_no_dia[a.id]["pago"] += (t.Quantidade * t.preco_unitario)
             
             total_aplicado = 0.0
             total_mercado = 0.0
